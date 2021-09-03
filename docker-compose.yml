@@ -1,0 +1,10 @@
+version: '3'
+services:
+  golang:
+    container_name: go-jwt
+    build: .
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/go/src
+    tty: true

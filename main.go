@@ -14,7 +14,7 @@ func main() {
 			[]byte("index"))	
 	})
 
-	r.GET("/token", func(c *gin.Context) {auth.GetTokenHandler(c)})
+	http.Handle("/token", auth.GetTokenHandler)
 	http.Handle("/login", auth.RenderLoginView)
 
 	http.Handle("/api/login", auth.Authentication)

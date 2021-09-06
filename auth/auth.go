@@ -2,8 +2,7 @@ package auth
 
 import (
 	"net/http"
-	"html/template"
-	"encoding/json"
+	"github.com/gin-gonic/gin"
 )
 
 type Jwt struct {
@@ -16,22 +15,22 @@ type User struct {
 	Password string
 }
 
-var GetTokenHandler = http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+func GetTokenHandler(c *gin.Context) {
+	c.Data(http.StatusOK, 
+		"text/html; charset=utf-8", 
+		[]byte("token"))
+}
 
-	// w.Write([]byte(token))
-	w.Write([]byte("token"))
-})
+func RenderLoginView(c *gin.Context) {
+	c.HTML(http.StatusOK, 
+		"login.html", 
+		gin.H{})
+}
 
-var RenderLoginView = http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
-	tmpl, _ := template.ParseFiles("auth/login.html")
-	tmpl.Execute(w, nil)
-})
-
-var Authentication = http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+func Authentication(c *gin.Context) {
+	email := c.DefaultPostForm("email", "")
+	password := c.DefaultPostForm("password", "")
 	user := &User{Email: email, Password: password}
 
-	w.Header().Add("content-type", "application/json")
-	json.NewEncoder(w).Encode(user)
-})
+	c.JSON(http.StatusOK, user)
+}

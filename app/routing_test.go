@@ -1,18 +1,17 @@
-package main
+package app
 
 import (
+	"encoding/json"
+	"golang/jwt/auth"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"testing"
-	"io/ioutil"
 	"strings"
-	"golang/jwt/app"
-	"golang/jwt/auth"
-	"encoding/json"
+	"testing"
 )
 
 func TestTokenPathHandler(t *testing.T) {
-	router := app.SetupRouter()
+	router := SetupRouter()
 
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/token", nil)
@@ -31,11 +30,11 @@ func TestTokenPathHandler(t *testing.T) {
 }
 
 func TestAuthenticationHandler(t *testing.T) {
-	router := app.SetupRouter()
+	router := SetupRouter()
 
 	res := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/api/login", 
-		strings.NewReader("email=hkpark@kddi.com&password=1234") )
+	req := httptest.NewRequest("POST", "/api/login",
+		strings.NewReader("email=hkpark@kddi.com&password=1234"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	router.ServeHTTP(res, req)
@@ -49,14 +48,21 @@ func TestAuthenticationHandler(t *testing.T) {
 
 	if e := user.Email; e != "hkpark@kddi.com" {
 		t.Errorf("Email doesn't match %s != %s", "hkpark@kddi.com", e)
-	}	
+	}
 }
 
-// func TestRenderLoginViewHandler(t *testing.T) {
-// 	router := app.SetupRouter()
+func TestRenderLoginViewHandler(t *testing.T) {
+	router := SetupRouter()
 
-// 	res := httptest.NewRecorder()
-// 	req := httptest.NewRequest("GET", "/login", nil)
+	res := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/login", nil)
 
-// 	router.ServeHTTP(res, req)
-// }
+	router.ServeHTTP(res, req)
+
+	data, _ := ioutil.ReadAll(res.Body)
+
+	if e := string(data); !strings.Contains(e, "Email : ") {
+		t.Errorf("Render failed %s", e)
+	}
+
+}

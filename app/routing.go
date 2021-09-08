@@ -1,18 +1,19 @@
 package app
 
 import (
-	"net/http"
 	"golang/jwt/auth"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob("../templates/*")
 	r.GET("/", func(c *gin.Context) {
-		c.Data(http.StatusOK, 
-			"text/html; charset=utf-8", 
-			[]byte("index"))	
+		c.Data(http.StatusOK,
+			"text/html; charset=utf-8",
+			[]byte("index"))
 	})
 
 	r.GET("/token", func(c *gin.Context) { auth.GetTokenHandler(c) })

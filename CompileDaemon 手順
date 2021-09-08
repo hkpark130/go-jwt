@@ -1,2 +1,0 @@
-go install github.com/githubnemo/CompileDaemon
-~/go/bin/CompileDaemon -directory=.

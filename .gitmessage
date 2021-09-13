@@ -1,0 +1,12 @@
+################
+# commit message例) feat : ログイン機能追加
+################
+# --COMMIT END--
+# feat      : 新しい機能追加
+# fix      : バグとか機能の修正
+# remove   : ファイル削除
+# refactor : リファクタリング
+# docs     : ドキュメント作成（add, mod, del）
+# test     : テストコード作成（add, mod, del）
+# etc      : Scriptとかテンプレートなどの修正
+################ 

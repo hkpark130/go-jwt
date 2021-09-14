@@ -15,5 +15,4 @@
 # vendor/
 
 jwt
-
-CompileDaemon
+.env

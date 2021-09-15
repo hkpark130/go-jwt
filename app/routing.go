@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(path string) *gin.Engine {
 	r := gin.Default()
-	r.LoadHTMLGlob("../templates/*")
+	r.LoadHTMLGlob(path + "/templates/*")
 	r.GET("/", func(c *gin.Context) {
 		c.Data(http.StatusOK,
 			"text/html; charset=utf-8",

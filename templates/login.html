@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="ja">
-    <head>
-        <title>go-jwt</title>
-    </head>
-    <body>
-        <form method="POST" action="/api/login">
-            Email : <input type="text" name="email"/></br>
-            Password : <input type="password" name="password"/></br>
-            <input type="submit" value="login"/>
-        </form>
-    </body>
-</html>
+{{ template "header.html" .}}
+
+<body>
+    <form method="POST" action="/api/login">
+        Email : <input type="text" name="email"/></br>
+        Password : <input type="password" name="password"/></br>
+        <input type="submit" value="login"/>
+    </form>
+</body>
+
+{{ template "footer.html" .}}

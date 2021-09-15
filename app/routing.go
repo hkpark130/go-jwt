@@ -9,7 +9,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	r.LoadHTMLGlob("../templates/*")
+	r.LoadHTMLGlob("templates/*")
 	r.GET("/", func(c *gin.Context) {
 		c.Data(http.StatusOK,
 			"text/html; charset=utf-8",

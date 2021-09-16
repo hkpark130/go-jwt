@@ -4,17 +4,27 @@ import (
 	"encoding/json"
 	"golang/jwt/auth"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 )
 
-var path, _ = os.Getwd()
-var router = SetupRouter(path + "/..") // 「go test」の時、パスが（go-jwt/app）の中になる
+func get_router() *gin.Engine {
+	path, err := os.Getwd()
+	router := SetupRouter(path + "/..") // 「go test」の時、パスが（go-jwt/app）の中になる
+	if err != nil {
+		log.Fatal(err)
+	}
+	return router
+}
 
 func TestTokenPathHandler(t *testing.T) {
+	router := get_router()
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/token", nil)
 
@@ -32,6 +42,7 @@ func TestTokenPathHandler(t *testing.T) {
 }
 
 func TestAuthenticationHandler(t *testing.T) {
+	router := get_router()
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/api/login",
 		strings.NewReader("email=hkpark@kddi.com&password=1234"))
@@ -52,6 +63,7 @@ func TestAuthenticationHandler(t *testing.T) {
 }
 
 func TestRenderLoginViewHandler(t *testing.T) {
+	router := get_router()
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/login", nil)
 

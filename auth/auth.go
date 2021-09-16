@@ -2,28 +2,29 @@ package auth
 
 import (
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
 type Jwt struct {
-	AccessToken string
+	AccessToken  string
 	RefreshToken string
 }
 
 type User struct {
-	Email string
+	Email    string
 	Password string
 }
 
 func GetTokenHandler(c *gin.Context) {
-	c.Data(http.StatusOK, 
-		"text/html; charset=utf-8", 
+	c.Data(http.StatusOK,
+		"text/html; charset=utf-8",
 		[]byte("token"))
 }
 
 func RenderLoginView(c *gin.Context) {
-	c.HTML(http.StatusOK, 
-		"login.html", 
+	c.HTML(http.StatusOK,
+		"login.html",
 		gin.H{})
 }
 

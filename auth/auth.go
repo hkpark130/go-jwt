@@ -21,7 +21,7 @@ type User struct {
 }
 
 func GetTokenHandler(c *gin.Context) {
-	dsn := "host=192.168.32.2 user=" + os.Getenv("POSTGRES_USER") +
+	dsn := "host=db user=" + os.Getenv("POSTGRES_USER") +
 		" password=" + os.Getenv("POSTGRES_PASSWORD") +
 		" dbname=" + os.Getenv("POSTGRES_DB") +
 		" port=5432 sslmode=disable"

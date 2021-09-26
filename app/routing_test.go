@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"golang/jwt/auth"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
@@ -15,11 +13,9 @@ import (
 )
 
 func get_router() *gin.Engine {
-	path, err := os.Getwd()
-	router := SetupRouter(path + "/..") // 「go test」の時、パスが（go-jwt/app）の中になる
-	if err != nil {
-		log.Fatal(err)
-	}
+	path := "./../"
+	router := SetupRouter(path) // 「go test」の時、パスが（go-jwt/app）の中になる
+
 	return router
 }
 

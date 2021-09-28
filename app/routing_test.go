@@ -43,7 +43,7 @@ func TestAuthenticationHandler(t *testing.T) {
 		t.Fatal("Not 200 Status / ", res.Code)
 	}
 
-	var user auth.User
+	var user auth.JwtUser
 	json.NewDecoder(res.Body).Decode(&user)
 
 	if e := user.Email; e != "hkpark@kddi.com" {

@@ -3,14 +3,15 @@ package app
 import (
 	"golang/jwt/auth"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(path string) *gin.Engine {
+func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	r.LoadHTMLGlob(filepath.Join(path, "templates/*"))
+	r.LoadHTMLGlob(filepath.Join(os.Getenv("TEMPLATE_PATH"), "templates/*"))
 
 	r.GET("/", func(c *gin.Context) {
 		c.Data(http.StatusOK,

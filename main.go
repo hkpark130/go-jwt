@@ -5,8 +5,6 @@ import (
 )
 
 func main() {
-	path := "./"
-	r := app.SetupRouter(path) // 「go run」の時、パスが（go-jwt）になる
-
+	r := app.SetupRouter()
 	r.Run(":3000")
 }

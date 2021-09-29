@@ -8,3 +8,5 @@ services:
     volumes:
       - ./:/go/src
     tty: true
+    environment: 
+      - TEMPLATE_PATH=/go/src

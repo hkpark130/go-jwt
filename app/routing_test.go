@@ -12,7 +12,6 @@ import (
 
 func TestTokenPathHandler(t *testing.T) {
 	router := SetupRouter()
-
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/token", nil)
 
@@ -31,7 +30,6 @@ func TestTokenPathHandler(t *testing.T) {
 
 func TestAuthenticationHandler(t *testing.T) {
 	router := SetupRouter()
-
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/api/login",
 		strings.NewReader("email=hkpark@kddi.com&password=1234"))
@@ -53,7 +51,6 @@ func TestAuthenticationHandler(t *testing.T) {
 
 func TestRenderLoginViewHandler(t *testing.T) {
 	router := SetupRouter()
-
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/login", nil)
 

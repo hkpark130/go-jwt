@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"golang/jwt/domain"
 	"os"
 	"testing"
 
@@ -24,7 +25,7 @@ func TestAuthenticationHandler(t *testing.T) {
 		t.Errorf("Failed to insert. %s ", result.Error)
 	}
 
-	var user JwtUser
+	var user domain.JwtUser
 	db.Where("Email = ?", "t@test.com").Find(&user)
 	if e := user.Email; e != "t@test.com" {
 		t.Errorf("Email doesn't match. %s != %s", "t@test.com", e)

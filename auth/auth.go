@@ -1,9 +1,9 @@
 package auth
 
 import (
+	"golang/jwt/domain"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -13,16 +13,6 @@ import (
 type Jwt struct {
 	AccessToken  string
 	RefreshToken string
-}
-
-type JwtUser struct {
-	gorm.Model
-	Id        int64     `gorm:"primaryKey"`
-	Email     string    `gorm:"column:email"`
-	Password  string    `gorm:"column:password"`
-	CreatedAt time.Time `gorm:"type:DATE"`
-	UpdatedAt time.Time `gorm:"type:DATE"`
-	DeletedAt time.Time `gorm:"type:DATE"`
 }
 
 func GetTokenHandler(c *gin.Context) {
@@ -37,7 +27,7 @@ func GetTokenHandler(c *gin.Context) {
 		output = "fail"
 	}
 
-	result := db.Create(&JwtUser{Email: "t@test.com", Password: "t"})
+	result := db.Create(&domain.JwtUser{Email: "t@test.com", Password: "t"})
 
 	if result.Error != nil {
 		output = "fail"
@@ -57,7 +47,7 @@ func RenderLoginView(c *gin.Context) {
 func Authentication(c *gin.Context) {
 	email := c.DefaultPostForm("email", "")
 	password := c.DefaultPostForm("password", "")
-	user := &JwtUser{Email: email, Password: password}
+	user := &domain.JwtUser{Email: email, Password: password}
 
 	c.JSON(http.StatusOK, user)
 }

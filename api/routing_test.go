@@ -2,7 +2,7 @@ package app
 
 import (
 	"encoding/json"
-	"golang/jwt/domain"
+	"golang/jwt/auth"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +12,6 @@ import (
 
 func TestTokenPathHandler(t *testing.T) {
 	router := SetupRouter()
-
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/token", nil)
 
@@ -31,7 +30,6 @@ func TestTokenPathHandler(t *testing.T) {
 
 func TestAuthenticationHandler(t *testing.T) {
 	router := SetupRouter()
-
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/api/login",
 		strings.NewReader("email=hkpark@kddi.com&password=1234"))
@@ -43,7 +41,7 @@ func TestAuthenticationHandler(t *testing.T) {
 		t.Fatal("Not 200 Status / ", res.Code)
 	}
 
-	var user domain.JwtUser
+	var user auth.User
 	json.NewDecoder(res.Body).Decode(&user)
 
 	if e := user.Email; e != "hkpark@kddi.com" {
@@ -53,7 +51,6 @@ func TestAuthenticationHandler(t *testing.T) {
 
 func TestRenderLoginViewHandler(t *testing.T) {
 	router := SetupRouter()
-
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/login", nil)
 

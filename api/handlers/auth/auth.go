@@ -3,11 +3,8 @@ package auth
 import (
 	"golang/jwt/domain"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 type Jwt struct {
@@ -16,26 +13,10 @@ type Jwt struct {
 }
 
 func GetTokenHandler(c *gin.Context) {
-	dsn := "host=db user=" + os.Getenv("POSTGRES_USER") +
-		" password=" + os.Getenv("POSTGRES_PASSWORD") +
-		" dbname=" + os.Getenv("POSTGRES_DB") +
-		" port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	output := "success"
-
-	if err != nil {
-		output = "fail"
-	}
-
-	result := db.Create(&domain.JwtUser{Email: "t@test.com", Password: "t"})
-
-	if result.Error != nil {
-		output = "fail"
-	}
 
 	c.Data(http.StatusOK,
 		"text/html; charset=utf-8",
-		[]byte(output))
+		[]byte("token"))
 }
 
 func RenderLoginView(c *gin.Context) {

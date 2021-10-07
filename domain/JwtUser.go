@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,6 +16,7 @@ type JwtUser struct {
 	DeletedAt time.Time `gorm:"type:DATE"`
 }
 
+// TODO: interface をrepositoryで実装する
 // type JwtUserUseCase interface {
 // 	CreateUser(*JwtUser) error
 // 	UpdateUser(*JwtUser) error
@@ -29,11 +29,12 @@ type JwtUserUseCase struct {
 }
 
 func (usecase *JwtUserUseCase) CreateUser(u *JwtUser) error {
-	err := // DB insert
+	// TODO: DB insert機能
+	// err :=
 
-	if err != nil {
-		err = fmt.Errorf("[usecase.CreateUser] failed: %w ", err)
-		return err
-	}
+	// if err != nil {
+	// 	err = fmt.Errorf("[usecase.CreateUser] failed: %w ", err)
+	// 	return err
+	// }
 	return nil
 }

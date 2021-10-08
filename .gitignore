@@ -16,3 +16,6 @@
 
 jwt
 .env
+.vscode
+main
+CompileDaemon

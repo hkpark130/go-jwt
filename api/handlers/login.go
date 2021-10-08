@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"golang/jwt/domain"
+	"golang/jwt/api/domain"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

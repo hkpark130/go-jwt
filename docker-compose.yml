@@ -9,12 +9,12 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_DB=${DB_NAME}
     volumes: 
-      - "./docker/init/:/docker-entrypoint-initdb.d/"
+      - "./docker/data/:/docker-entrypoint-initdb.d/"
     networks:
       - go
 # API
   golang:
-    container_name: go-jwt
+    container_name: go-jwt-api
     build: .
     ports:
       - 3000:3000
@@ -30,13 +30,13 @@ services:
     networks:
       - go
 # FrontEnd
-  # apache:
-  #   container_name: go-jwt
-  #   build: apache/.
-  #   ports:
-  #     - 80:80
-  #   volumes:
-  #     - ./:/var/www/
+  apache:
+    container_name: go-jwt-web
+    build: ./docker/apache/.
+    ports:
+      - 80:80
+    volumes:
+      - ./static_server/:/var/www/html/
 
 networks:
   go:

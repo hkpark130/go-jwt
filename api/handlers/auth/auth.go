@@ -19,11 +19,11 @@ func GetTokenHandler(c *gin.Context) {
 		[]byte("token"))
 }
 
-func RenderLoginView(c *gin.Context) {
-	c.HTML(http.StatusOK,
-		"login.html",
-		gin.H{})
-}
+// func RenderLoginView(c *gin.Context) {
+// 	c.HTML(http.StatusOK,
+// 		"login.html",
+// 		gin.H{})
+// }
 
 func Authentication(c *gin.Context) {
 	email := c.DefaultPostForm("email", "")

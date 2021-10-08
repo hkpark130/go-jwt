@@ -1,8 +1,8 @@
 package main
 
 import (
-	"golang/jwt/adapter"
-	"golang/jwt/app"
+	app "golang/jwt/api"
+	"golang/jwt/api/adapter"
 	"log"
 )
 

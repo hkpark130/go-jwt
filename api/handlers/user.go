@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"golang/jwt/domain"
-	"golang/jwt/repository"
+	"golang/jwt/api/domain"
+	"golang/jwt/api/repository"
 	"log"
 	"net/http"
 	"strconv"

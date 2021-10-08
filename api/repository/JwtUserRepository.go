@@ -2,7 +2,7 @@ package repository
 
 import (
 	"fmt"
-	"golang/jwt/domain"
+	"golang/jwt/api/domain"
 
 	"gorm.io/gorm"
 )

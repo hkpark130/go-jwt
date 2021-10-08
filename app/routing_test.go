@@ -2,7 +2,7 @@ package app
 
 import (
 	"encoding/json"
-	"golang/jwt/auth"
+	"golang/jwt/domain"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -41,7 +41,7 @@ func TestAuthenticationHandler(t *testing.T) {
 		t.Fatal("Not 200 Status / ", res.Code)
 	}
 
-	var user auth.User
+	var user domain.JwtUser
 	json.NewDecoder(res.Body).Decode(&user)
 
 	if e := user.Email; e != "hkpark@kddi.com" {

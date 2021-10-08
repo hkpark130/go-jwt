@@ -1,5 +1,19 @@
 version: '3'
 services:
+  db:
+    container_name: go-jwt-db
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment: 
+      - POSTGRES_PASSWORD=${DB_PW}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    volumes: 
+      - "./init/:/docker-entrypoint-initdb.d/"
+    networks:
+      - go
+
   golang:
     container_name: go-jwt
     build: .
@@ -7,6 +21,17 @@ services:
       - 3000:3000
     volumes:
       - ./:/go/src
-    tty: true
     environment: 
+      - POSTGRES_PASSWORD=${DB_PW}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
       - TEMPLATE_PATH=/go/src
+    tty: true
+    depends_on:
+      - db
+    networks:
+      - go
+
+networks:
+  go:
+    driver: bridge

@@ -12,7 +12,6 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.LoadHTMLGlob(filepath.Join(os.Getenv("TEMPLATE_PATH"), "templates/*"))
-
 	r.GET("/", func(c *gin.Context) {
 		c.Data(http.StatusOK,
 			"text/html; charset=utf-8",

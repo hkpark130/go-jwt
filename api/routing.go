@@ -38,7 +38,6 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	}))
 
 	r.GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c) })
-	// r.GET("/login", func(c *gin.Context) { auth.RenderLoginView(c) })
 	r.POST("/api/login", func(c *gin.Context) { handlers.Authentication(c) })
 
 	r.POST("/user/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) })

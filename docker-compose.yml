@@ -1,6 +1,6 @@
 version: '3'
 services:
-# DB
+# go-jwt-db
   db:
     container_name: go-jwt-db
     image: postgres:13.4
@@ -12,7 +12,7 @@ services:
       - "./docker/data/:/docker-entrypoint-initdb.d/"
     networks:
       - go
-# API
+# go-jwt-api
   golang:
     container_name: go-jwt-api
     build: .
@@ -30,7 +30,7 @@ services:
       - db
     networks:
       - go
-# FrontEnd
+# apache
   apache:
     container_name: go-jwt-web
     build: ./docker/apache/.

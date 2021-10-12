@@ -3,8 +3,9 @@ package app
 import (
 	"golang/jwt/api/handlers"
 	"golang/jwt/api/repository"
-	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -13,11 +14,28 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	jwtUserRepository := &repository.JwtUserRepository{DB: db}
 	r := gin.Default()
 
-	r.GET("/", func(c *gin.Context) {
-		c.Data(http.StatusOK,
-			"text/html; charset=utf-8",
-			[]byte("index"))
-	})
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"http://localhost",
+			"https://localhost",
+		},
+		AllowMethods: []string{
+			"POST",
+			"GET",
+			"PUT",
+			"DELETE",
+		},
+		AllowHeaders: []string{
+			"Access-Control-Allow-Credentials",
+			"Access-Control-Allow-Headers",
+			"Content-Type",
+			"Content-Length",
+			"Accept-Encoding",
+			"Authorization",
+		},
+		AllowCredentials: true,
+		MaxAge:           24 * time.Hour,
+	}))
 
 	r.GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c) })
 	// r.GET("/login", func(c *gin.Context) { auth.RenderLoginView(c) })

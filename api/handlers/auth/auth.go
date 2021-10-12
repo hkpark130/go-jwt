@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"golang/jwt/domain"
+	"golang/jwt/api/domain"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +18,6 @@ func GetTokenHandler(c *gin.Context) {
 		"text/html; charset=utf-8",
 		[]byte("token"))
 }
-
-// func RenderLoginView(c *gin.Context) {
-// 	c.HTML(http.StatusOK,
-// 		"login.html",
-// 		gin.H{})
-// }
 
 func Authentication(c *gin.Context) {
 	email := c.DefaultPostForm("email", "")

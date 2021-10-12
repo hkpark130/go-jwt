@@ -38,6 +38,8 @@ services:
       - 80:80
     volumes:
       - ./static_server/:/var/www/html/
+    networks:
+      - go
 
 networks:
   go:

@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TODO: requset data -> auth package -> return data here
+
 func GetTokenHandler(c *gin.Context) {
 
 	c.Data(http.StatusOK,
@@ -15,8 +17,8 @@ func GetTokenHandler(c *gin.Context) {
 }
 
 func Authentication(c *gin.Context) {
-	email := c.DefaultPostForm("email", "")
-	password := c.DefaultPostForm("password", "")
+	email := c.Request.FormValue("email")
+	password := c.Request.FormValue("password")
 	user := &domain.JwtUser{Email: email, Password: password}
 
 	c.JSON(http.StatusOK, user)

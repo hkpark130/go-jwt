@@ -1,21 +1,20 @@
 version: '3'
 services:
+# go-jwt-db
   db:
     container_name: go-jwt-db
-    image: postgres:latest
-    ports:
-      - "5432:5432"
+    image: postgres:13.4
     environment: 
       - POSTGRES_PASSWORD=${DB_PW}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_DB=${DB_NAME}
     volumes: 
-      - "./init/:/docker-entrypoint-initdb.d/"
+      - "./docker/data/:/docker-entrypoint-initdb.d/"
     networks:
       - go
-
+# go-jwt-api
   golang:
-    container_name: go-jwt
+    container_name: go-jwt-api
     build: .
     ports:
       - 3000:3000
@@ -29,6 +28,16 @@ services:
     tty: true
     depends_on:
       - db
+    networks:
+      - go
+# apache
+  apache:
+    container_name: go-jwt-web
+    build: ./docker/apache/.
+    ports:
+      - 80:80
+    volumes:
+      - ./static_server/:/var/www/html/
     networks:
       - go
 

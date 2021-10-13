@@ -20,7 +20,7 @@ func TestAuthenticationHandler(t *testing.T) {
 		t.Errorf("Failed to connect to database. %s", err)
 	}
 
-	result := db.Create(&JwtUser{Email: "t@test.com", Password: "t"})
+	result := db.Create(&domain.JwtUser{Email: "t@test.com", Password: "t"})
 	if result.Error != nil {
 		t.Errorf("Failed to insert. %s ", result.Error)
 	}

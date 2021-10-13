@@ -1,10 +1,17 @@
 package main
 
 import (
-	"golang/jwt/app"
+	app "golang/jwt/api"
+	"golang/jwt/api/adapter"
+	"log"
 )
 
 func main() {
-	r := app.SetupRouter()
+	db, err := adapter.Init()
+	if err != nil {
+		log.Printf("Failed to connect to Database %s ", err)
+	}
+
+	r := app.SetupRouter(db)
 	r.Run(":3000")
 }

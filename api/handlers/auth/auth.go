@@ -7,11 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Jwt struct {
-	AccessToken  string
-	RefreshToken string
-}
-
 func GetTokenHandler(c *gin.Context) {
 
 	c.Data(http.StatusOK,

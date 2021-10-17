@@ -24,6 +24,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PW}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_DB=${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
       - TEMPLATE_PATH=/go/src
     tty: true
     depends_on:

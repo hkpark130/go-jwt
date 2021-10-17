@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"golang/jwt/api/domain"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,9 +14,11 @@ func GetTokenHandler(c *gin.Context) {
 }
 
 func Authentication(c *gin.Context) {
-	email := c.DefaultPostForm("email", "")
-	password := c.DefaultPostForm("password", "")
-	user := &domain.JwtUser{Email: email, Password: password}
+	// TODO: ログイン情報認証処理
 
-	c.JSON(http.StatusOK, user)
+	// email := c.DefaultPostForm("email", "")
+	// password := c.DefaultPostForm("password", "")
+	// user := &domain.JwtUser{Email: email, Password: password}
+
+	// c.JSON(http.StatusOK, user)
 }

@@ -28,7 +28,7 @@ func Authentication(c *gin.Context) {
 
 	token := auth.Hashing(payload)
 
-	decode_payload := auth.Decode(token)
+	claim := auth.Decode(token)
 
-	c.JSON(http.StatusOK, decode_payload)
+	c.JSON(http.StatusOK, claim)
 }

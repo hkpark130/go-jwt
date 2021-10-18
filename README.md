@@ -7,8 +7,8 @@ docker-compose build
 docker-compose up -d
 ```
 
-### テストコマンドを実行する時、テンプレートのパスを指定する必要があります。
+### テストコマンドを実行する時、SECRET_KEYを設定する必要があります。
 
 ```sh
-TEMPLATE_PATH=".." go test ./...
+SECRET_KEY="{SECRET_KEY}" go test api/handlers/auth/*
 ```

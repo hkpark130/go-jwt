@@ -21,7 +21,7 @@ function login_api() {
 
     $.ajax(settings).done(function(data, status, xhr) {
         user = JSON.parse(data);
-        alert("hello! " + user.Email);
+        alert("hello! " + user.email);
     }).fail(function (error) {
         alert("fail");
     });

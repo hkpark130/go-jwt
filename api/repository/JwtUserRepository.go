@@ -28,6 +28,13 @@ func (jwtUserRepository JwtUserRepository) GetUserByID(i uint64) (*domain.JwtUse
 	return user, result.Error
 }
 
+func (jwtUserRepository JwtUserRepository) GetUserByEmail(email string) (*domain.JwtUser, error) {
+	var user *domain.JwtUser
+	result := jwtUserRepository.DB.Where("email = ?", email).First(&user)
+
+	return user, result.Error
+}
+
 func (jwtUserRepository JwtUserRepository) GetUsers() ([]*domain.JwtUser, error) {
 	var users []*domain.JwtUser
 	result := jwtUserRepository.DB.Find(&users)

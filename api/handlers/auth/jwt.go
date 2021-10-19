@@ -65,6 +65,23 @@ func Hashing(payload *Payload) string {
 	return token
 }
 
+func jsonUnmarshal(jsonBytes []byte, decodedData interface{}) {
+	if err := json.Unmarshal(jsonBytes, &decodedData); err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func parseExpiration(pldat Payload) time.Time {
+	layout := "2006-01-02 15:04:05"
+	exp := pldat.Exp.Format(layout)
+	expParsed, err := time.ParseInLocation(layout, exp, time.Now().Location())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return expParsed
+}
+
 func Decode(token string) Payload {
 	jwt := &Jwt{Alg: "HS256", Secret_key: os.Getenv("SECRET_KEY")}
 
@@ -75,29 +92,18 @@ func Decode(token string) Payload {
 	header, _ := base64.RawURLEncoding.DecodeString(parts[0])
 	payload, _ := base64.RawURLEncoding.DecodeString(parts[1])
 	signature := parts[2]
-	// JSON decode payload
-	var pldat Payload
-	if err := json.Unmarshal(payload, &pldat); err != nil {
-		log.Fatal(err.Error())
-	}
-	// JSON decode header
+
 	var headdat Header
-	if err := json.Unmarshal(header, &headdat); err != nil {
-		log.Fatal(err.Error())
-	}
-	// Extract and parse expiration date from payload
-	layout := "2006-01-02 15:04:05"
-	exp := pldat.Exp.Format(layout)
-	expParsed, err := time.ParseInLocation(layout, exp, time.Now().Location())
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Check how old the JWT is.  Return an error if it is expired
+	var pldat Payload
+	jsonUnmarshal(header, &headdat)
+	jsonUnmarshal(payload, &pldat)
+
+	expParsed := parseExpiration(pldat)
 	now := time.Now()
 	if now.After(expParsed) {
 		log.Fatal("Expired JWT")
 	}
-	// This probably should be one of the first checks, preceeding the date check.  If the signature of the JWT doesn't match there is likely fuckery afoot
+
 	ha := hmac256(string(parts[0])+"."+string(parts[1]), jwt.Secret_key)
 	if ha != string(signature) {
 		log.Fatal("Invalid JWT signature")

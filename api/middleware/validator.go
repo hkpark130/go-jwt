@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func LoginValidation() gin.HandlerFunc {
+func LoginFormValidation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email := c.Request.FormValue("email")
 		password := c.Request.FormValue("password")
@@ -19,7 +19,8 @@ func LoginValidation() gin.HandlerFunc {
 			})
 			c.Abort()
 			return
-		} else if email_err != nil {
+		}
+		if email_err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "Please check your email again.",
 			})

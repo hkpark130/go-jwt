@@ -90,22 +90,26 @@ func parseJWT(token string) (string, string, string) {
 	return parts[0], parts[1], parts[2]
 }
 
-func jsonUnmarshal(jsonBytes []byte, decodedData interface{}) {
-	if err := json.Unmarshal(jsonBytes, &decodedData); err != nil {
-		log.Fatal(err.Error())
-	}
-}
-
 func Decode(token string) Payload {
-	jwt := &Jwt{Alg: "HS256", Secret_key: os.Getenv("SECRET_KEY")}
-
-	header, payload, signature := parseJWT(token)
+	_, payload, _ := parseJWT(token)
 	decodedPayload, err := base64.RawURLEncoding.DecodeString(payload)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	var pldat Payload
-	jsonUnmarshal(decodedPayload, &pldat)
+	if err := json.Unmarshal(decodedPayload, &pldat); err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return pldat
+}
+
+func VerifyToken(token string) {
+	jwt := &Jwt{Alg: "HS256", Secret_key: os.Getenv("SECRET_KEY")}
+	header, payload, signature := parseJWT(token)
+
+	pldat := Decode(token)
 
 	isExpired(pldat)
 
@@ -113,6 +117,4 @@ func Decode(token string) Payload {
 	if ha != string(signature) {
 		log.Fatal("Invalid JWT signature")
 	}
-
-	return pldat
 }

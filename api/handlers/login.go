@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"golang/jwt/api/handlers/auth"
 	"golang/jwt/api/repository"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // TODO: requset data -> auth package -> return data here
@@ -22,14 +24,15 @@ func GetTokenHandler(c *gin.Context) {
 
 func IsRegisteredUser(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
 	err := jwtUserRepository.CheckUser(payload.Email, payload.Password)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false
+	}
 	if err == nil {
 		return true
-	}
-	if err.Error() != "record not found" {
+	} else {
 		log.Fatal("Failed to read user form DB:", err)
+		return false
 	}
-
-	return false
 }
 
 func Authentication(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {

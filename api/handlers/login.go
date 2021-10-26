@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"golang/jwt/api/domain"
 	"golang/jwt/api/handlers/auth"
 	"golang/jwt/api/repository"
 	"log"
@@ -23,19 +24,19 @@ func GetTokenHandler(c *gin.Context) {
 }
 
 func IsRegisteredUser(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
-	err := jwtUserRepository.CheckUser(payload.Email, payload.Password)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return false
-	}
-	if err == nil {
+	jwtUser := &domain.JwtUser{Email: payload.Email, Password: payload.Password}
+	user, err := jwtUserRepository.LoginEmailPassword(jwtUser)
+	if (domain.JwtUser{}) != *user {
 		return true
-	} else {
-		log.Fatal("Failed to read user form DB:", err)
-		return false
 	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Fatal("Failed to read user form DB:", err)
+	}
+	return false
 }
 
-func Authentication(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
+func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	email := c.Request.FormValue("email")
 	password := c.Request.FormValue("password")
 	payload := &auth.Payload{

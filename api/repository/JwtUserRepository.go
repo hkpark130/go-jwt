@@ -28,11 +28,11 @@ func (jwtUserRepository JwtUserRepository) GetUserByID(i uint64) (*domain.JwtUse
 	return user, result.Error
 }
 
-func (jwtUserRepository JwtUserRepository) CheckUser(email string, password string) error {
+func (jwtUserRepository JwtUserRepository) LoginEmailPassword(jwtUser *domain.JwtUser) (*domain.JwtUser, error) {
 	var user *domain.JwtUser
-	result := jwtUserRepository.DB.Where("email = ? AND password = ?", email, password).First(&user)
+	result := jwtUserRepository.DB.Where("email = ? AND password = ?", jwtUser.Email, jwtUser.Password).First(&user)
 
-	return result.Error
+	return user, result.Error
 }
 
 func (jwtUserRepository JwtUserRepository) GetUsers() ([]*domain.JwtUser, error) {

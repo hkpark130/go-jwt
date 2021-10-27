@@ -26,13 +26,14 @@ func GetTokenHandler(c *gin.Context) {
 func IsRegisteredUser(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
 	jwtUser := &domain.JwtUser{Email: payload.Email, Password: payload.Password}
 	user, err := jwtUserRepository.LoginEmailPassword(jwtUser)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Fatal("Failed to read user form DB:", err)
+	}
+
 	if (domain.JwtUser{}) != *user {
 		return true
 	}
 
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Fatal("Failed to read user form DB:", err)
-	}
 	return false
 }
 

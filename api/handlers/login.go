@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"errors"
+	"fmt"
+	"golang/jwt/api/domain"
 	"golang/jwt/api/handlers/auth"
 	"golang/jwt/api/repository"
 	"log"
@@ -8,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // TODO: requset data -> auth package -> return data here
@@ -19,19 +23,21 @@ func GetTokenHandler(c *gin.Context) {
 		[]byte("token"))
 }
 
-func IsRegistered(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
-	_, err := jwtUserRepository.GetUserByEmail(payload.Email)
-	if err == nil {
-		return true
-	} else if err.Error() == "record not found" {
-		return false
-	} else {
+func IsRegisteredUser(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
+	jwtUser := &domain.JwtUser{Email: payload.Email, Password: payload.Password}
+	user, err := jwtUserRepository.LoginEmailPassword(jwtUser)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Fatal("Failed to read user form DB:", err)
-		return false
 	}
+
+	if (domain.JwtUser{}) != *user {
+		return true
+	}
+
+	return false
 }
 
-func Authentication(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
+func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	email := c.Request.FormValue("email")
 	password := c.Request.FormValue("password")
 	payload := &auth.Payload{
@@ -40,18 +46,17 @@ func Authentication(c *gin.Context, jwtUserRepository *repository.JwtUserReposit
 		Email:    email,
 		Password: password}
 
-	if !IsRegistered(payload, jwtUserRepository) {
+	if !IsRegisteredUser(payload, jwtUserRepository) {
 		// TODO: Redirect login page
 		c.JSON(http.StatusUnauthorized,
 			gin.H{"status": http.StatusUnauthorized,
-				"error": "Unregistered user"})
+				"error": "メールアドレスとパスワードをもう一度確認してください。"})
 		c.Abort()
 		return
 	}
 
 	token := auth.Hashing(payload)
+	c.Header("Authorization", fmt.Sprintf("Bearer %s", token))
 
-	claim := auth.Decode(token)
-
-	c.JSON(http.StatusOK, claim)
+	c.JSON(http.StatusOK, "OK")
 }

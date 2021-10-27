@@ -20,9 +20,18 @@ function login_api() {
     };
 
     $.ajax(settings).done(function(data, status, xhr) {
-        user = JSON.parse(data);
-        alert("hello! " + user.email);
-    }).fail(function (error) {
-        alert("fail");
+        msg = JSON.parse(data);
+        if (msg == "OK"){
+            alert("success");
+        } else {
+            alert("fail");
+        }
+    }).fail(function (data, textStatus, errorThrown) {
+        if(data){
+            msg = JSON.parse(data.responseText).error;
+            alert(msg);
+        } else {
+            alert("fail");
+        }
     });
 }

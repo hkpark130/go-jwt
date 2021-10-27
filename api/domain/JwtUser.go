@@ -17,4 +17,5 @@ type JwtUserUseCase interface {
 	GetUsers() ([]*JwtUser, error)
 	GetUserByID(int) (*JwtUser, error)
 	DeleteUserByID(int) error
+	CheckUser(string, string) error
 }

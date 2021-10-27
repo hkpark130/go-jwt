@@ -17,16 +17,17 @@ import (
 // TODO: requset data -> auth package -> return data here
 
 func GetTokenHandler(c *gin.Context) {
+	token := c.GetHeader("Authorization")
 
 	c.Data(http.StatusOK,
 		"text/html; charset=utf-8",
-		[]byte("token"))
+		[]byte(token))
 }
 
 func IsRegisteredUser(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
 	jwtUser := &domain.JwtUser{Email: payload.Email, Password: payload.Password}
 	user, err := jwtUserRepository.LoginEmailPassword(jwtUser)
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Fatal("Failed to read user form DB:", err)
 	}
 

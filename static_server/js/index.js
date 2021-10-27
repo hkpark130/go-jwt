@@ -1,3 +1,4 @@
+var x;
 
 function login_api() {
     if(!$('input[name=email]')[0].checkValidity() || !$('input[name=password]')[0].checkValidity()){
@@ -33,5 +34,20 @@ function login_api() {
         } else {
             alert("fail");
         }
+    });
+}
+
+function token_api() {
+    var settings = {
+      "url": "http://localhost:3000/token",
+      "method": "GET",
+      "timeout": 0,
+      "headers": {
+        "Authorization": "Bearer AAA.BBB.CCC"
+      },
+    };
+
+    $.ajax(settings).done(function (response) {
+        console.log(response);
     });
 }

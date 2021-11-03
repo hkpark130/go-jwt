@@ -17,11 +17,18 @@ import (
 // TODO: requset data -> auth package -> return data here
 
 func GetTokenHandler(c *gin.Context) {
-	token := c.GetHeader("Authorization")
+	cookie, err := c.Request.Cookie("Authorization")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{"status": http.StatusBadRequest,
+				"error": "Failed to get Authorization cookie."})
+		c.Abort()
+		return
+	}
 
 	c.Data(http.StatusOK,
 		"text/html; charset=utf-8",
-		[]byte(token))
+		[]byte(cookie.Value))
 }
 
 func IsRegisteredUser(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
@@ -56,8 +63,14 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 		return
 	}
 
-	token := auth.Hashing(payload)
-	c.Header("Authorization", fmt.Sprintf("Bearer %s", token))
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "Authorization",
+		Value:    fmt.Sprintf("Bearer %s", auth.Hashing(payload)),
+		Expires:  payload.Exp,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+	})
 
 	c.JSON(http.StatusOK, "OK")
 }

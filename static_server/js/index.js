@@ -11,13 +11,16 @@ function login_api() {
     form.append("password", $('input[name=password]').val());
     
     var settings = {
-      "url": "http://localhost:3000/api/login",
-      "method": "POST",
-      "timeout": 0,
-      "processData": false,
-      "mimeType": "multipart/form-data",
-      "contentType": false,
-      "data": form
+        "url": "http://localhost:3000/api/login",
+        "method": "POST",
+        "timeout": 0,
+        "processData": false,
+        "mimeType": "multipart/form-data",
+        "contentType": false,
+        "data": form,
+        xhrFields: {
+            withCredentials: true
+        },
     };
 
     $.ajax(settings).done(function(data, status, xhr) {
@@ -39,12 +42,12 @@ function login_api() {
 
 function token_api() {
     var settings = {
-      "url": "http://localhost:3000/token",
-      "method": "GET",
-      "timeout": 0,
-      "headers": {
-        "Authorization": "Bearer AAA.BBB.CCC"
-      },
+        "url": "http://localhost:3000/user/token",
+        "method": "GET",
+        "timeout": 0,
+        xhrFields: {
+            withCredentials: true
+        },
     };
 
     $.ajax(settings).done(function (response) {

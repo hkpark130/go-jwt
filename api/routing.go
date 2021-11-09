@@ -40,15 +40,14 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	r.POST("/api/login", middleware.LoginFormValidation(), func(c *gin.Context) { handlers.Login(c, jwtUserRepository) })
 
-	user := r.Group("/user", middleware.Authorization())
-	{
-		user.GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c) })
-		user.POST("/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) })
-		user.GET("/:id", func(c *gin.Context) { handlers.GetUserByIDHandler(c, jwtUserRepository) })
-		user.GET("/users", func(c *gin.Context) { handlers.GetUsersHandler(c, jwtUserRepository) })
-		user.PUT("/update", func(c *gin.Context) { handlers.UpdateHandler(c, jwtUserRepository) })
-		user.DELETE("/delete", func(c *gin.Context) { handlers.DeleteHandler(c, jwtUserRepository) })
-	}
+	// user API router
+	r.Group("/user", middleware.Authorization()).
+		GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c) }).
+		POST("/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) }).
+		GET("/:id", func(c *gin.Context) { handlers.GetUserByIDHandler(c, jwtUserRepository) }).
+		GET("/users", func(c *gin.Context) { handlers.GetUsersHandler(c, jwtUserRepository) }).
+		PUT("/update", func(c *gin.Context) { handlers.UpdateHandler(c, jwtUserRepository) }).
+		DELETE("/delete", func(c *gin.Context) { handlers.DeleteHandler(c, jwtUserRepository) })
 
 	return r
 }

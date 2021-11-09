@@ -6,15 +6,12 @@ import (
 	"golang/jwt/api/domain"
 	"golang/jwt/api/handlers/auth"
 	"golang/jwt/api/repository"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
-
-// TODO: requset data -> auth package -> return data here
 
 func GetTokenHandler(c *gin.Context) {
 	cookie, err := c.Request.Cookie("Authorization")
@@ -31,17 +28,25 @@ func GetTokenHandler(c *gin.Context) {
 		[]byte(cookie.Value))
 }
 
-func IsRegisteredUser(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
+func IsRegisteredUser(c *gin.Context, payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
 	jwtUser := &domain.JwtUser{Email: payload.Email, Password: payload.Password}
 	user, err := jwtUserRepository.LoginEmailPassword(jwtUser)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Fatal("Failed to read user form DB:", err)
+		c.JSON(http.StatusUnauthorized,
+			gin.H{"status": http.StatusInternalServerError,
+				"error": fmt.Sprintf("Failed to read user form DB: %s", err)})
+		c.Abort()
+		return false
 	}
 
 	if (domain.JwtUser{}) != *user {
 		return true
 	}
 
+	c.JSON(http.StatusUnauthorized,
+		gin.H{"status": http.StatusUnauthorized,
+			"error": "メールアドレスとパスワードをもう一度確認してください。"})
+	c.Abort()
 	return false
 }
 
@@ -54,12 +59,7 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 		Email:    email,
 		Password: password}
 
-	if !IsRegisteredUser(payload, jwtUserRepository) {
-		// TODO: Redirect login page
-		c.JSON(http.StatusUnauthorized,
-			gin.H{"status": http.StatusUnauthorized,
-				"error": "メールアドレスとパスワードをもう一度確認してください。"})
-		c.Abort()
+	if !IsRegisteredUser(c, payload, jwtUserRepository) {
 		return
 	}
 

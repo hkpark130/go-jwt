@@ -1,5 +1,3 @@
-var x;
-
 function login_api() {
     if(!$('input[name=email]')[0].checkValidity() || !$('input[name=password]')[0].checkValidity()){
         alert("Please check the input data again.");
@@ -26,14 +24,14 @@ function login_api() {
     $.ajax(settings).done(function(data, status, xhr) {
         msg = JSON.parse(data);
         if (msg == "OK"){
-            alert("success");
+            location.href = "/"
         } else {
             alert("fail");
         }
     }).fail(function (data, textStatus, errorThrown) {
         if(data){
             msg = JSON.parse(data.responseText).error;
-            alert(msg);
+            $('#error')[0].innerHTML = "<p style='color:red;'>"+ msg +"</p>";
         } else {
             alert("fail");
         }

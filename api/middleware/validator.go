@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"golang/jwt/api/handlers/auth"
+	"log"
 	"net/http"
 	"net/mail"
 	"strings"
@@ -45,8 +46,10 @@ func Authorization() gin.HandlerFunc {
 			return
 		}
 
-		err = auth.VerifyToken(strings.Split(cookie.Value, " ")[1])
-		if err != nil {
+		if isVerifiedFlag, err := auth.IsTokenVerified(strings.Split(cookie.Value, " ")[1]); !isVerifiedFlag {
+			if err != nil {
+				log.Fatal(err)
+			}
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Fail to verify.",
 			})

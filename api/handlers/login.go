@@ -16,7 +16,7 @@ import (
 func GetTokenHandler(c *gin.Context) {
 	cookie, err := c.Request.Cookie("Authorization")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized,
+		c.JSON(http.StatusBadRequest,
 			gin.H{"status": http.StatusBadRequest,
 				"error": "Failed to get Authorization cookie."})
 		c.Abort()
@@ -32,7 +32,7 @@ func IsRegisteredUser(c *gin.Context, payload *auth.Payload, jwtUserRepository *
 	jwtUser := &domain.JwtUser{Email: payload.Email, Password: payload.Password}
 	user, err := jwtUserRepository.LoginEmailPassword(jwtUser)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusUnauthorized,
+		c.JSON(http.StatusInternalServerError,
 			gin.H{"status": http.StatusInternalServerError,
 				"error": fmt.Sprintf("Failed to read user form DB: %s", err)})
 		c.Abort()

@@ -68,21 +68,21 @@ func Hashing(payload *Payload) string {
 	return token
 }
 
-func isExpired(pldat Payload) error {
+func isExpired(pldat Payload) (bool, error) {
 	layout := "2006-01-02 15:04:05"
 	exp := pldat.Exp.Format(layout)
 	expParsed, err := time.ParseInLocation(layout, exp, time.Now().Location())
 	if err != nil {
 		err := fmt.Errorf("failed: %w ", err)
-		return err
+		return false, err
 	}
 
 	now := time.Now()
 	if now.After(expParsed) {
-		err := fmt.Errorf("expired JWT")
-		return err
+		log.Println("expired JWT: %w", pldat.Email)
+		return false, nil
 	}
-	return nil
+	return true, nil
 }
 
 func parseJWT(token string) (string, string, string) {
@@ -109,22 +109,24 @@ func Decode(token string) Payload {
 	return pldat
 }
 
-func VerifyToken(token string) error {
+func IsTokenVerified(token string) (bool, error) {
 	jwt := &Jwt{Alg: "HS256", Secret_key: os.Getenv("SECRET_KEY")}
 	header, payload, signature := parseJWT(token)
 
 	pldat := Decode(token)
 
-	err := isExpired(pldat)
-	if err != nil {
-		return err
+	if isExpiredFlag, err := isExpired(pldat); !isExpiredFlag {
+		if err != nil {
+			return false, err
+		}
+		return false, nil
 	}
 
 	ha := hmac256(strings.Join([]string{header, payload}, "."), jwt.Secret_key)
 	if ha != string(signature) {
-		err := fmt.Errorf("invalid JWT signature")
-		return err
+		log.Println("invalid JWT signature: %w", pldat.Email)
+		return false, nil
 	}
 
-	return nil
+	return true, nil
 }

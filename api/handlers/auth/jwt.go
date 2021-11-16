@@ -78,7 +78,7 @@ func isExpired(pldat Payload) bool {
 
 	now := time.Now()
 	if now.After(expParsed) {
-		log.Println("expired JWT: %w", pldat.Email)
+		log.Println("expired JWT")
 		return false
 	}
 	return true
@@ -114,13 +114,13 @@ func IsTokenVerified(token string) bool {
 
 	pldat := Decode(token)
 
-	if isExpiredFlag := isExpired(pldat); !isExpiredFlag {
+	if !isExpired(pldat) {
 		return false
 	}
 
 	ha := hmac256(strings.Join([]string{header, payload}, "."), jwt.Secret_key)
 	if ha != string(signature) {
-		log.Println("invalid JWT signature: %w", pldat.Email)
+		log.Println("invalid JWT signature")
 		return false
 	}
 

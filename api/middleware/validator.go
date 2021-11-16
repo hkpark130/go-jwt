@@ -45,7 +45,7 @@ func Authorization() gin.HandlerFunc {
 			return
 		}
 
-		if isVerifiedFlag := auth.IsTokenVerified(strings.Split(cookie.Value, " ")[1]); !isVerifiedFlag {
+		if !auth.IsTokenVerified(strings.Split(cookie.Value, " ")[1]) {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Fail to verify.",
 			})

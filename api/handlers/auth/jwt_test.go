@@ -36,5 +36,5 @@ func TestDecoding(t *testing.T) {
 
 func TestVerifyToken(t *testing.T) {
 	token := TEST_TOKEN
-	VerifyToken(token)
+	IsTokenVerified(token)
 }

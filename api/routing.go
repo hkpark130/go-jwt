@@ -2,6 +2,7 @@ package app
 
 import (
 	"golang/jwt/api/handlers"
+	"golang/jwt/api/middleware"
 	"golang/jwt/api/repository"
 	"time"
 
@@ -37,14 +38,16 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		MaxAge:           24 * time.Hour,
 	}))
 
-	r.GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c) })
-	r.POST("/api/login", func(c *gin.Context) { handlers.Authentication(c) })
+	r.POST("/api/login", middleware.LoginFormValidation(), func(c *gin.Context) { handlers.Login(c, jwtUserRepository) })
 
-	r.POST("/user/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) })
-	r.GET("/user/:id", func(c *gin.Context) { handlers.GetUserByIDHandler(c, jwtUserRepository) })
-	r.GET("/users", func(c *gin.Context) { handlers.GetUsersHandler(c, jwtUserRepository) })
-	r.PUT("/user/update", func(c *gin.Context) { handlers.UpdateHandler(c, jwtUserRepository) })
-	r.DELETE("/user/delete", func(c *gin.Context) { handlers.DeleteHandler(c, jwtUserRepository) })
+	// user API router
+	r.Group("/user", middleware.Authorization()).
+		GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c) }).
+		POST("/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) }).
+		GET("/:id", func(c *gin.Context) { handlers.GetUserByIDHandler(c, jwtUserRepository) }).
+		GET("/users", func(c *gin.Context) { handlers.GetUsersHandler(c, jwtUserRepository) }).
+		PUT("/update", func(c *gin.Context) { handlers.UpdateHandler(c, jwtUserRepository) }).
+		DELETE("/delete", func(c *gin.Context) { handlers.DeleteHandler(c, jwtUserRepository) })
 
 	return r
 }

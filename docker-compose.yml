@@ -41,6 +41,26 @@ services:
       - ./static_server/:/var/www/html/
     networks:
       - go
+# go-doc
+  godoc:
+    container_name: go-doc
+    build: ./docker/godoc/.
+    command: godoc -http=godoc:6060
+    ports:
+      - 6060:6060
+    volumes:
+      - ./:/go/src
+    environment: 
+      - POSTGRES_PASSWORD=${DB_PW}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - TEMPLATE_PATH=/go/src
+    tty: true
+    depends_on:
+      - db
+    networks:
+      - go
 
 networks:
   go:

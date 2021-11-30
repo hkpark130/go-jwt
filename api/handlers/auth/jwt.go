@@ -1,3 +1,4 @@
+// Package auth is JWT トークン認証関連パッケージ
 package auth
 
 import (
@@ -12,8 +13,8 @@ import (
 )
 
 type Jwt struct {
-	Alg        string
-	Secret_key string
+	Alg       string
+	SecretKey string
 }
 
 type Header struct {
@@ -38,7 +39,7 @@ func hmac256(message, secret string) string {
 }
 
 func Hashing(payload *Payload) string {
-	jwt := &Jwt{Alg: "HS256", Secret_key: os.Getenv("SECRET_KEY")}
+	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
 
 	jsonHeader, err := json.Marshal(Header{
 		Typ: "JWT",
@@ -57,7 +58,7 @@ func Hashing(payload *Payload) string {
 		base64.RawURLEncoding.EncodeToString(jsonHeader),
 		base64.RawURLEncoding.EncodeToString(jsonPayload)}, ".")
 
-	signature := hmac256(msg, jwt.Secret_key)
+	signature := hmac256(msg, jwt.SecretKey)
 
 	token := strings.Join([]string{
 		base64.RawURLEncoding.EncodeToString(jsonHeader),
@@ -109,7 +110,7 @@ func Decode(token string) Payload {
 }
 
 func IsTokenVerified(token string) bool {
-	jwt := &Jwt{Alg: "HS256", Secret_key: os.Getenv("SECRET_KEY")}
+	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
 	header, payload, signature := parseJWT(token)
 
 	pldat := Decode(token)
@@ -118,7 +119,7 @@ func IsTokenVerified(token string) bool {
 		return false
 	}
 
-	ha := hmac256(strings.Join([]string{header, payload}, "."), jwt.Secret_key)
+	ha := hmac256(strings.Join([]string{header, payload}, "."), jwt.SecretKey)
 	if ha != string(signature) {
 		log.Println("invalid JWT signature")
 		return false

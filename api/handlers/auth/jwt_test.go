@@ -9,12 +9,15 @@ const TEST_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOiIyMDIxLTExLTE
 
 func TestHashing(t *testing.T) {
 	// 期限切れの検証で引っかかるので、2021年11月に設定
-	token := Hashing(&Payload{
+	token, err := Hashing(&Payload{
 		Exp:      time.Date(2021, 11, 17, 20, 34, 58, 651387237, time.UTC),
 		Iat:      time.Date(2021, 11, 17, 20, 34, 58, 651387237, time.UTC),
 		Email:    "test@test.com",
 		Password: "test",
 	})
+	if err != nil {
+		t.Error(err)
+	}
 
 	expectedToken := TEST_TOKEN
 
@@ -26,7 +29,10 @@ func TestHashing(t *testing.T) {
 
 func TestDecoding(t *testing.T) {
 	token := TEST_TOKEN
-	claim := Decode(token)
+	claim, err := Decode(token)
+	if err != nil {
+		t.Error(err)
+	}
 
 	if claim.Email != "test@test.com" || claim.Password != "test" {
 		t.Error("Something wrong with the decoding process.")

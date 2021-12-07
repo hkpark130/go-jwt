@@ -1,3 +1,4 @@
+// Package auth is JWT トークン認証関連パッケージ
 package auth
 
 import (
@@ -5,22 +6,27 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
 
+// Jwt はトークンハッシュ化の際に使われる
 type Jwt struct {
-	Alg        string
-	Secret_key string
+	Alg       string
+	SecretKey string
 }
 
+// Header はトークンタイプとハッシュアルゴリズムの情報を持っている
 type Header struct {
 	Typ string `json:"typ"`
 	Alg string `json:"alg"`
 }
 
+// Payload はユーザーデータを持っている
 type Payload struct {
 	Exp      time.Time `json:"exp"`
 	Iat      time.Time `json:"iat"`
@@ -28,7 +34,9 @@ type Payload struct {
 	Password string    `json:"password"`
 }
 
-const JWTLEN = 3
+var (
+	errInvalidJwt = errors.New("Invalid JWT Structure")
+)
 
 func hmac256(message, secret string) string {
 	key := []byte(secret)
@@ -37,36 +45,38 @@ func hmac256(message, secret string) string {
 	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }
 
-func Hashing(payload *Payload) string {
-	jwt := &Jwt{Alg: "HS256", Secret_key: os.Getenv("SECRET_KEY")}
+// Hashing は受け取ったPayload をもとにトークンを作る
+func Hashing(payload *Payload) (string, error) {
+	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
 
 	jsonHeader, err := json.Marshal(Header{
 		Typ: "JWT",
 		Alg: jwt.Alg,
 	})
 	if err != nil {
-		log.Fatal("json encode error: %w ", err)
+		log.Panicln("json encode error: %w ", err)
 	}
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		log.Fatal("json encode error: %w ", err)
+		log.Panicln("json encode error: %w ", err)
 	}
 
 	msg := strings.Join([]string{
 		base64.RawURLEncoding.EncodeToString(jsonHeader),
 		base64.RawURLEncoding.EncodeToString(jsonPayload)}, ".")
 
-	signature := hmac256(msg, jwt.Secret_key)
+	signature := hmac256(msg, jwt.SecretKey)
 
 	token := strings.Join([]string{
 		base64.RawURLEncoding.EncodeToString(jsonHeader),
 		base64.RawURLEncoding.EncodeToString(jsonPayload),
 		signature}, ".")
 
-	return token
+	return token, err
 }
 
+// isExpired は受け取ったPayload の有効期限を確認する
 func isExpired(pldat Payload) bool {
 	layout := "2006-01-02 15:04:05"
 	exp := pldat.Exp.Format(layout)
@@ -84,42 +94,56 @@ func isExpired(pldat Payload) bool {
 	return true
 }
 
-func parseJWT(token string) (string, string, string) {
-	parts := strings.Split(token, ".")
-	if len(parts) != JWTLEN {
-		log.Fatal("Invalid JWT Structure")
+func parseJWT(token string) ([]string, error) {
+	if regexp.MustCompile(`^[\w-]+\.[\w-]+\.[\w-]+$`).MatchString(token) {
+		parts := strings.Split(token, ".")
+		return parts, nil
 	}
-
-	return parts[0], parts[1], parts[2]
+	log.Println(errInvalidJwt)
+	return nil, errInvalidJwt
 }
 
-func Decode(token string) Payload {
-	_, payload, _ := parseJWT(token)
-	decodedPayload, err := base64.RawURLEncoding.DecodeString(payload)
+// Decode は受け取ったtoken をPayload にデコーディングする
+func Decode(token string) (Payload, error) {
+	parts, err := parseJWT(token)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+	}
+
+	decodedPayload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		log.Println(err)
 	}
 
 	var pldat Payload
 	if err := json.Unmarshal(decodedPayload, &pldat); err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 	}
 
-	return pldat
+	return pldat, err
 }
 
+// IsTokenVerified は受け取ったtoken の有効性を確認する
 func IsTokenVerified(token string) bool {
-	jwt := &Jwt{Alg: "HS256", Secret_key: os.Getenv("SECRET_KEY")}
-	header, payload, signature := parseJWT(token)
+	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
+	parts, err := parseJWT(token)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
 
-	pldat := Decode(token)
+	pldat, err := Decode(token)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
 
 	if !isExpired(pldat) {
 		return false
 	}
 
-	ha := hmac256(strings.Join([]string{header, payload}, "."), jwt.Secret_key)
-	if ha != string(signature) {
+	ha := hmac256(strings.Join([]string{parts[0], parts[1]}, "."), jwt.SecretKey)
+	if ha != string(parts[2]) {
 		log.Println("invalid JWT signature")
 		return false
 	}

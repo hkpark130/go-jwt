@@ -63,9 +63,18 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 		return
 	}
 
+	token, err := auth.Hashing(payload)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"status": http.StatusInternalServerError,
+				"error": "Failed to hashing."})
+		c.Abort()
+		return
+	}
+
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "Authorization",
-		Value:    fmt.Sprintf("Bearer %s", auth.Hashing(payload)),
+		Value:    fmt.Sprintf("Bearer %s", token),
 		Expires:  payload.Exp,
 		Path:     "/",
 		Secure:   true,

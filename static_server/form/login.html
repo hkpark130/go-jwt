@@ -5,11 +5,14 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
         <script src="/js/index.js" defer></script>
         <title>go-jwt</title>
+        <link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.css'>
     </head>
     <body>
-        Email : <input type="text" name="email" required/></br>
-        Password : <input type="password" name="password" required/>
-        <div id="error"></div>
-        <input type="submit" value="login" onclick="login_api();"/>
+        <div>
+            Email : <input type="text" name="email" required/>
+            Password : <input type="password" name="password" required/>
+            <div id="error"></div>
+            <input type="submit" value="login" onclick="login_api();"/>
+        </div>
     </body>
 </html>

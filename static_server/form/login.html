@@ -9,10 +9,14 @@
     </head>
     <body>
         <div>
-            Email : <input type="text" name="email" required/>
-            Password : <input type="password" name="password" required/>
-            <div id="error"></div>
-            <input type="submit" value="login" onclick="login_api();"/>
+            <form>
+                <label for="email">Email</label>
+                <input type="text" name="email" required/>
+                <label for="password">Password</label>
+                <input type="password" name="password" required/>
+                <div id="error"></div>
+                <input type="submit" value="login" onclick="login_api();"/>
+            </form>
         </div>
     </body>
 </html>

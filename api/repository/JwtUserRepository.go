@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"golang/jwt/api/domain"
 
+	"log"
+
+	"github.com/go-redis/redis"
 	"gorm.io/gorm"
 )
 
 type JwtUserRepository struct {
-	DB *gorm.DB
+	DB    *gorm.DB
+	Redis *redis.Client
 }
 
 func (jwtUserRepository JwtUserRepository) CreateUser(u *domain.JwtUser) error {
@@ -54,4 +58,24 @@ func (jwtUserRepository JwtUserRepository) DeleteUserByID(i uint64) error {
 	result := jwtUserRepository.DB.Delete(&user, i)
 
 	return result.Error
+}
+
+func (jwtUserRepository JwtUserRepository) SetRefreshToken(email string, token string) error {
+	err := jwtUserRepository.Redis.Set(email, token, 0)
+
+	if err != nil {
+		log.Printf("Failed to set refresh token: %w ", err.Err())
+		return err.Err()
+	}
+	return nil
+}
+
+func (jwtUserRepository JwtUserRepository) GetRefreshToken(email string) (string, error) {
+	val, err := jwtUserRepository.Redis.Get(email).Result()
+
+	if err != nil {
+		log.Printf("Failed to get refresh token: %w ", err)
+		return "", err
+	}
+	return val, nil
 }

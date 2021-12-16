@@ -31,7 +31,7 @@ type Payload struct {
 	Exp      time.Time `json:"exp"`
 	Iat      time.Time `json:"iat"`
 	Email    string    `json:"email"`
-	Password string    `json:"password"`
+	Password string    `json:"password"` // X
 }
 
 var (
@@ -125,7 +125,7 @@ func Decode(token string) (Payload, error) {
 
 // IsTokenVerified は受け取ったtoken の有効性を確認する
 func IsTokenVerified(token string) bool {
-	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
+	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")} //id+pw
 	parts, err := parseJWT(token)
 	if err != nil {
 		log.Println(err)

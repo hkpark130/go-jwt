@@ -12,6 +12,11 @@ func main() {
 		log.Printf("Failed to connect to Database %s ", err)
 	}
 
-	r := app.SetupRouter(db)
+	redis, err := adapter.InitializeRedisClient()
+	if err != nil {
+		log.Printf("Failed to connect to Redis %s ", err)
+	}
+
+	r := app.SetupRouter(db, redis)
 	r.Run(":3000")
 }

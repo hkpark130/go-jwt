@@ -72,6 +72,15 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 		return
 	}
 
+	err = jwtUserRepository.SetRefreshToken(email, token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"status": http.StatusInternalServerError,
+				"error": "Failed to set token in redis."})
+		c.Abort()
+		return
+	}
+
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "Authorization",
 		Value:    fmt.Sprintf("Bearer %s", token),

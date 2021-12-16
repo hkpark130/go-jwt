@@ -8,11 +8,13 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"gorm.io/gorm"
 )
 
-func SetupRouter(db *gorm.DB) *gin.Engine {
-	jwtUserRepository := &repository.JwtUserRepository{DB: db}
+func SetupRouter(db *gorm.DB, redis *redis.Client) *gin.Engine {
+	jwtUserRepository := &repository.JwtUserRepository{DB: db, Redis: redis}
+
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{

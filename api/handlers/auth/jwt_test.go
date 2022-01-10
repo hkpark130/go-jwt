@@ -5,15 +5,14 @@ import (
 	"time"
 )
 
-const TEST_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJpYXQiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJwYXNzd29yZCI6InRlc3QifQ._hsnRMXR8IXsO7wKRVT3Sz7XkarIkHq0kNfcUMDLdqw"
+const TEST_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJpYXQiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20ifQ.BDIt0KLqjYxbZaCMxzK0sb5uZDBBtKfPvrTbLijCcKk"
 
 func TestHashing(t *testing.T) {
 	// 期限切れの検証で引っかかるので、2021年11月に設定
-	token, err := Hashing(&Payload{
-		Exp:      time.Date(2021, 11, 17, 20, 34, 58, 651387237, time.UTC),
-		Iat:      time.Date(2021, 11, 17, 20, 34, 58, 651387237, time.UTC),
-		Email:    "test@test.com",
-		Password: "test",
+	token, err := IssueAccessToken(&Payload{
+		Exp:   time.Date(2021, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		Iat:   time.Date(2021, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		Email: "test@test.com",
 	})
 	if err != nil {
 		t.Error(err)

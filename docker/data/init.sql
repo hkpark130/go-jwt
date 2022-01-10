@@ -11,4 +11,4 @@ CREATE TABLE jwt_users (
   deleted_at DATE
 );
 
-INSERT INTO jwt_users (email, password) VALUES ('test@test.com', 'x');
+INSERT INTO jwt_users (email, password) VALUES ('test@test.com', '$2a$10$fkUtvFeOb17E7fF0tNV1tOtyZHqPp1IDDOvvXs9SxuTceGlU5lmiu');

@@ -28,10 +28,9 @@ type Header struct {
 
 // Payload はユーザーデータを持っている
 type Payload struct {
-	Exp      time.Time `json:"exp"`
-	Iat      time.Time `json:"iat"`
-	Email    string    `json:"email"`
-	Password string    `json:"password"` // X
+	Exp   time.Time `json:"exp"`
+	Iat   time.Time `json:"iat"`
+	Email string    `json:"email"`
 }
 
 var (
@@ -45,8 +44,41 @@ func hmac256(message, secret string) string {
 	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }
 
-// Hashing は受け取ったPayload をもとにトークンを作る
-func Hashing(payload *Payload) (string, error) {
+// IssueRefreshToken は受け取ったPayload をもとにトークンを作る
+func IssueRefreshToken(payload *Payload) (string, error) {
+	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
+	jwt.Alg = ""
+
+	jsonHeader, err := json.Marshal(Header{
+		Typ: "JWT",
+		Alg: jwt.Alg,
+	})
+	if err != nil {
+		log.Panicln("json encode error: %w ", err)
+	}
+
+	payload.Email = ""
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		log.Panicln("json encode error: %w ", err)
+	}
+
+	msg := strings.Join([]string{
+		base64.RawURLEncoding.EncodeToString(jsonHeader),
+		base64.RawURLEncoding.EncodeToString(jsonPayload)}, ".")
+
+	signature := hmac256(msg, jwt.SecretKey)
+
+	token := strings.Join([]string{
+		base64.RawURLEncoding.EncodeToString(jsonHeader),
+		base64.RawURLEncoding.EncodeToString(jsonPayload),
+		signature}, ".")
+
+	return token, err
+}
+
+// IssueAccessToken は受け取ったPayload をもとにトークンを作る
+func IssueAccessToken(payload *Payload) (string, error) {
 	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
 
 	jsonHeader, err := json.Marshal(Header{

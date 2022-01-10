@@ -41,11 +41,11 @@ func SetupRouter(db *gorm.DB, redis *redis.Client) *gin.Engine {
 	}))
 
 	r.POST("/api/login", middleware.LoginFormValidation(), func(c *gin.Context) { handlers.Login(c, jwtUserRepository) })
+	r.POST("/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) })
 
 	// user API router
 	r.Group("/user", middleware.Authorization()).
 		GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c) }).
-		POST("/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) }).
 		GET("/:id", func(c *gin.Context) { handlers.GetUserByIDHandler(c, jwtUserRepository) }).
 		GET("/users", func(c *gin.Context) { handlers.GetUsersHandler(c, jwtUserRepository) }).
 		PUT("/update", func(c *gin.Context) { handlers.UpdateHandler(c, jwtUserRepository) }).

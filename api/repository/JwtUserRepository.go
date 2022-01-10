@@ -34,7 +34,7 @@ func (jwtUserRepository JwtUserRepository) GetUserByID(i uint64) (*domain.JwtUse
 
 func (jwtUserRepository JwtUserRepository) LoginEmailPassword(jwtUser *domain.JwtUser) (*domain.JwtUser, error) {
 	var user *domain.JwtUser
-	result := jwtUserRepository.DB.Where("email = ? AND password = ?", jwtUser.Email, jwtUser.Password).First(&user)
+	result := jwtUserRepository.DB.Where("email = ?", jwtUser.Email).First(&user)
 
 	return user, result.Error
 }
@@ -61,11 +61,11 @@ func (jwtUserRepository JwtUserRepository) DeleteUserByID(i uint64) error {
 }
 
 func (jwtUserRepository JwtUserRepository) SetRefreshToken(email string, token string) error {
-	err := jwtUserRepository.Redis.Set(email, token, 0)
+	err := jwtUserRepository.Redis.Set(email, token, 0).Err()
 
 	if err != nil {
-		log.Printf("Failed to set refresh token: %w ", err.Err())
-		return err.Err()
+		log.Printf("Failed to set refresh token: %s ", err)
+		return err
 	}
 	return nil
 }
@@ -74,7 +74,7 @@ func (jwtUserRepository JwtUserRepository) GetRefreshToken(email string) (string
 	val, err := jwtUserRepository.Redis.Get(email).Result()
 
 	if err != nil {
-		log.Printf("Failed to get refresh token: %w ", err)
+		log.Printf("Failed to get refresh token: %s ", err)
 		return "", err
 	}
 	return val, nil

@@ -5,41 +5,49 @@ import (
 	"time"
 )
 
-const TEST_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJpYXQiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20ifQ.BDIt0KLqjYxbZaCMxzK0sb5uZDBBtKfPvrTbLijCcKk"
+const TEST_ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJpYXQiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20ifQ.BDIt0KLqjYxbZaCMxzK0sb5uZDBBtKfPvrTbLijCcKk"
+const TEST_REFRESH_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJpYXQiOiIyMDIxLTExLTE3VDIwOjM0OjU4LjY1MTM4NzIzN1oiLCJlbWFpbCI6IiJ9.YkFM6MT8NS8elbEbMw2P0RjAzvuIf_YY6vescl7HENo"
 
 func TestHashing(t *testing.T) {
 	// 期限切れの検証で引っかかるので、2021年11月に設定
-	token, err := IssueAccessToken(&Payload{
+	payload := &Payload{
 		Exp:   time.Date(2021, 11, 17, 20, 34, 58, 651387237, time.UTC),
 		Iat:   time.Date(2021, 11, 17, 20, 34, 58, 651387237, time.UTC),
 		Email: "test@test.com",
-	})
+	}
+
+	accessToken, err := IssueToken(payload)
 	if err != nil {
 		t.Error(err)
 	}
 
-	expectedToken := TEST_TOKEN
+	modifiedPayload := ModifyForRefreshToken(payload)
+	refreshToken, err := IssueToken(modifiedPayload)
+	if err != nil {
+		t.Error(err)
+	}
 
-	if token != expectedToken {
+	if accessToken != TEST_ACCESS_TOKEN || refreshToken != TEST_REFRESH_TOKEN {
 		t.Error("Something wrong with the hashing process.")
-		t.Error("test token:", token)
+		t.Error("test access token:", accessToken)
+		t.Error("test refresh token:", refreshToken)
 	}
 }
 
 func TestDecoding(t *testing.T) {
-	token := TEST_TOKEN
+	token := TEST_ACCESS_TOKEN
 	claim, err := Decode(token)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if claim.Email != "test@test.com" || claim.Password != "test" {
+	if claim.Email != "test@test.com" {
 		t.Error("Something wrong with the decoding process.")
 		t.Error("test claim:", claim)
 	}
 }
 
 func TestVerifyToken(t *testing.T) {
-	token := TEST_TOKEN
+	token := TEST_ACCESS_TOKEN
 	IsTokenVerified(token)
 }

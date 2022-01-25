@@ -7,11 +7,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"golang/jwt/api/repository"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/go-redis/redis"
 )
 
 // Jwt はトークンハッシュ化の際に使われる
@@ -34,7 +37,8 @@ type Payload struct {
 }
 
 var (
-	errInvalidJwt = errors.New("Invalid JWT Structure")
+	errInvalidJwt   = errors.New("Invalid JWT Structure")
+	errExpiredToken = errors.New("Expired JWT Token")
 )
 
 func hmac256(message, secret string) string {
@@ -44,10 +48,19 @@ func hmac256(message, secret string) string {
 	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }
 
-// IssueRefreshToken は受け取ったPayload をもとにトークンを作る
-func IssueRefreshToken(payload *Payload) (string, error) {
+// ModifyForRefreshToken はRefreshToken に入れるPayload を作り直す
+func ModifyForRefreshToken(payload *Payload) *Payload {
+	modifiedPayload := &Payload{}
+	*modifiedPayload = *payload
+	modifiedPayload.Email = ""
+	modifiedPayload.Exp = payload.Exp.Add(time.Hour * 24 * 7)
+
+	return modifiedPayload
+}
+
+// IssueToken は受け取ったPayload をもとにトークンを作る
+func IssueToken(payload *Payload) (string, error) {
 	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
-	jwt.Alg = ""
 
 	jsonHeader, err := json.Marshal(Header{
 		Typ: "JWT",
@@ -57,7 +70,6 @@ func IssueRefreshToken(payload *Payload) (string, error) {
 		log.Panicln("json encode error: %w ", err)
 	}
 
-	payload.Email = ""
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		log.Panicln("json encode error: %w ", err)
@@ -77,35 +89,58 @@ func IssueRefreshToken(payload *Payload) (string, error) {
 	return token, err
 }
 
-// IssueAccessToken は受け取ったPayload をもとにトークンを作る
-func IssueAccessToken(payload *Payload) (string, error) {
-	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
-
-	jsonHeader, err := json.Marshal(Header{
-		Typ: "JWT",
-		Alg: jwt.Alg,
-	})
+// ReissueToken は受け取った Access Token の payload をもとにトークンを再発行する
+func ReissueToken(payload Payload, jwtUserRepository *repository.JwtUserRepository) (string, string, error) {
+	refreshToken, err := jwtUserRepository.GetRefreshToken(payload.Email)
 	if err != nil {
-		log.Panicln("json encode error: %w ", err)
+		if err == redis.Nil {
+			return "", "", errExpiredToken
+		} else {
+			log.Println(err)
+			return "", "", err
+		}
 	}
 
-	jsonPayload, err := json.Marshal(payload)
+	pldat, err := Decode(refreshToken)
 	if err != nil {
-		log.Panicln("json encode error: %w ", err)
+		log.Println(err)
+		return "", "", err
 	}
 
-	msg := strings.Join([]string{
-		base64.RawURLEncoding.EncodeToString(jsonHeader),
-		base64.RawURLEncoding.EncodeToString(jsonPayload)}, ".")
+	if !isExpired(pldat) {
+		return "", "", errExpiredToken
+	}
 
-	signature := hmac256(msg, jwt.SecretKey)
+	newPayload := CreatePayload(payload.Email)
+	accessToken, err := IssueToken(newPayload)
+	if err != nil {
+		log.Println(err)
+		return "", "", err
+	}
 
-	token := strings.Join([]string{
-		base64.RawURLEncoding.EncodeToString(jsonHeader),
-		base64.RawURLEncoding.EncodeToString(jsonPayload),
-		signature}, ".")
+	modifiedPayload := ModifyForRefreshToken(newPayload)
+	refreshToken, err = IssueToken(modifiedPayload)
+	if err != nil {
+		log.Println(err)
+		return "", "", err
+	}
 
-	return token, err
+	err = jwtUserRepository.SetRefreshToken(payload.Email, refreshToken, modifiedPayload.Exp)
+	if err != nil {
+		log.Println(err)
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+func CreatePayload(email string) *Payload {
+	payload := &Payload{
+		Exp:   time.Now().Add(time.Second * time.Duration(3600)), //3600 = 1H
+		Iat:   time.Now(),
+		Email: email}
+
+	return payload
 }
 
 // isExpired は受け取ったPayload の有効期限を確認する
@@ -156,29 +191,29 @@ func Decode(token string) (Payload, error) {
 }
 
 // IsTokenVerified は受け取ったtoken の有効性を確認する
-func IsTokenVerified(token string) bool {
+func IsTokenVerified(token string) (bool, error) {
 	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")} //id+pw
 	parts, err := parseJWT(token)
 	if err != nil {
 		log.Println(err)
-		return false
+		return false, err
 	}
 
 	pldat, err := Decode(token)
 	if err != nil {
 		log.Println(err)
-		return false
+		return false, err
 	}
 
 	if !isExpired(pldat) {
-		return false
+		return false, errExpiredToken
 	}
 
 	ha := hmac256(strings.Join([]string{parts[0], parts[1]}, "."), jwt.SecretKey)
 	if ha != string(parts[2]) {
 		log.Println("invalid JWT signature")
-		return false
+		return false, errInvalidJwt
 	}
 
-	return true
+	return true, nil
 }

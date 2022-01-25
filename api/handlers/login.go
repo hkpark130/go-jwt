@@ -7,11 +7,17 @@ import (
 	"golang/jwt/api/handlers/auth"
 	"golang/jwt/api/repository"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+)
+
+var (
+	ExpiresCookie = time.Now().Add(time.Hour * 24 * 7)
 )
 
 func HashPassword(password string) (string, error) {
@@ -24,19 +30,45 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func GetTokenHandler(c *gin.Context) {
+func GetTokenHandler(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	cookie, err := c.Request.Cookie("Authorization")
 	if err != nil {
-		c.JSON(http.StatusBadRequest,
-			gin.H{"status": http.StatusBadRequest,
+		c.JSON(http.StatusUnauthorized,
+			gin.H{"status": http.StatusUnauthorized,
 				"error": "Failed to get Authorization cookie."})
 		c.Abort()
 		return
 	}
 
+	payload, err := auth.Decode(strings.Split(cookie.Value, " ")[1])
+	if err != nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"status": http.StatusInternalServerError,
+				"error": "Failed to decode token."})
+		c.Abort()
+		return
+	}
+
+	refres, err := jwtUserRepository.GetRefreshToken(payload.Email)
+	if err != nil {
+		if err == redis.Nil {
+			c.JSON(http.StatusUnauthorized,
+				gin.H{"status": http.StatusUnauthorized,
+					"error": "トークンの有効期間が切りました。"})
+			c.Abort()
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError,
+				gin.H{"status": http.StatusInternalServerError,
+					"error": "Failed to read refresh token."})
+			c.Abort()
+			return
+		}
+	}
+
 	c.Data(http.StatusOK,
 		"text/html; charset=utf-8",
-		[]byte(cookie.Value))
+		[]byte(cookie.Value+refres))
 }
 
 func IsRegisteredUser(c *gin.Context, payload *auth.Payload, password string, jwtUserRepository *repository.JwtUserRepository) bool {
@@ -71,16 +103,13 @@ func IsRegisteredUser(c *gin.Context, payload *auth.Payload, password string, jw
 
 func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	email := c.Request.FormValue("email")
-	payload := &auth.Payload{
-		Exp:   time.Now().Add(time.Second * time.Duration(3600)),
-		Iat:   time.Now(),
-		Email: email}
+	payload := auth.CreatePayload(email)
 
 	if !IsRegisteredUser(c, payload, c.Request.FormValue("password"), jwtUserRepository) {
 		return
 	}
 
-	accessToken, err := auth.IssueAccessToken(payload)
+	accessToken, err := auth.IssueToken(payload)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError,
 			gin.H{"status": http.StatusInternalServerError,
@@ -89,7 +118,8 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 		return
 	}
 
-	refreshToken, err := auth.IssueRefreshToken(payload)
+	modifiedPayload := auth.ModifyForRefreshToken(payload)
+	refreshToken, err := auth.IssueToken(modifiedPayload)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError,
 			gin.H{"status": http.StatusInternalServerError,
@@ -98,7 +128,7 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 		return
 	}
 
-	err = jwtUserRepository.SetRefreshToken(email, accessToken)
+	err = jwtUserRepository.SetRefreshToken(email, refreshToken, modifiedPayload.Exp)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError,
 			gin.H{"status": http.StatusInternalServerError,
@@ -110,7 +140,7 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "Authorization",
 		Value:    fmt.Sprintf("Bearer %s", accessToken),
-		Expires:  payload.Exp,
+		Expires:  ExpiresCookie,
 		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,
@@ -119,7 +149,7 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "Refresh",
 		Value:    fmt.Sprintf("%s", refreshToken),
-		Expires:  payload.Exp,
+		Expires:  ExpiresCookie,
 		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,

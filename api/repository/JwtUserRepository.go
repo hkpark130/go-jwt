@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"golang/jwt/api/domain"
+	"time"
 
 	"log"
 
@@ -60,22 +61,24 @@ func (jwtUserRepository JwtUserRepository) DeleteUserByID(i uint64) error {
 	return result.Error
 }
 
-func (jwtUserRepository JwtUserRepository) SetRefreshToken(email string, token string) error {
-	err := jwtUserRepository.Redis.Set(email, token, 0).Err()
+func (jwtUserRepository JwtUserRepository) SetRefreshToken(email string, token string, exp time.Time) error {
+	err := jwtUserRepository.Redis.Set(email, token, time.Duration(exp.Sub(time.Now()))).Err()
 
 	if err != nil {
 		log.Printf("Failed to set refresh token: %s ", err)
-		return err
 	}
-	return nil
+
+	return err
 }
 
 func (jwtUserRepository JwtUserRepository) GetRefreshToken(email string) (string, error) {
 	val, err := jwtUserRepository.Redis.Get(email).Result()
 
-	if err != nil {
+	if err == redis.Nil {
+		fmt.Printf("%s does not exist", email)
+	} else if err != nil {
 		log.Printf("Failed to get refresh token: %s ", err)
-		return "", err
 	}
-	return val, nil
+
+	return val, err
 }

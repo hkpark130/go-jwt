@@ -30,6 +30,7 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
+// GetTokenHandler は RefreshToken をコンソールに出します。
 func GetTokenHandler(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	cookie, err := c.Request.Cookie("Authorization")
 	if err != nil {
@@ -49,12 +50,12 @@ func GetTokenHandler(c *gin.Context, jwtUserRepository *repository.JwtUserReposi
 		return
 	}
 
-	refres, err := jwtUserRepository.GetRefreshToken(payload.Email)
+	refresh, err := jwtUserRepository.GetRefreshToken(payload.Email)
 	if err != nil {
 		if err == redis.Nil {
 			c.JSON(http.StatusUnauthorized,
 				gin.H{"status": http.StatusUnauthorized,
-					"error": "トークンの有効期間が切りました。"})
+					"error": "The refresh token provided has expired."})
 			c.Abort()
 			return
 		} else {
@@ -68,7 +69,7 @@ func GetTokenHandler(c *gin.Context, jwtUserRepository *repository.JwtUserReposi
 
 	c.Data(http.StatusOK,
 		"text/html; charset=utf-8",
-		[]byte(cookie.Value+refres))
+		[]byte(refresh))
 }
 
 func IsRegisteredUser(c *gin.Context, payload *auth.Payload, password string, jwtUserRepository *repository.JwtUserRepository) bool {
@@ -85,7 +86,7 @@ func IsRegisteredUser(c *gin.Context, payload *auth.Payload, password string, jw
 	if !CheckPasswordHash(jwtUser.Password, user.Password) {
 		c.JSON(http.StatusUnauthorized,
 			gin.H{"status": http.StatusUnauthorized,
-				"error": "メールアドレスとパスワードをもう一度確認してください。"})
+				"error": "Please check your email address and password again."})
 		c.Abort()
 		return false
 	}
@@ -96,7 +97,7 @@ func IsRegisteredUser(c *gin.Context, payload *auth.Payload, password string, jw
 
 	c.JSON(http.StatusUnauthorized,
 		gin.H{"status": http.StatusUnauthorized,
-			"error": "メールアドレスとパスワードをもう一度確認してください。"})
+			"error": "Please check your email address and password again."})
 	c.Abort()
 	return false
 }

@@ -15,5 +15,7 @@
 # vendor/
 
 jwt
-
+.env
+.vscode
+main
 CompileDaemon

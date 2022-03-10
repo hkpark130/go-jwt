@@ -3,12 +3,17 @@ package repository
 import (
 	"fmt"
 	"golang/jwt/api/domain"
+	"time"
 
+	"log"
+
+	"github.com/go-redis/redis"
 	"gorm.io/gorm"
 )
 
 type JwtUserRepository struct {
-	DB *gorm.DB
+	DB    *gorm.DB
+	Redis *redis.Client
 }
 
 func (jwtUserRepository JwtUserRepository) CreateUser(u *domain.JwtUser) error {
@@ -30,7 +35,7 @@ func (jwtUserRepository JwtUserRepository) GetUserByID(i uint64) (*domain.JwtUse
 
 func (jwtUserRepository JwtUserRepository) LoginEmailPassword(jwtUser *domain.JwtUser) (*domain.JwtUser, error) {
 	var user *domain.JwtUser
-	result := jwtUserRepository.DB.Where("email = ? AND password = ?", jwtUser.Email, jwtUser.Password).First(&user)
+	result := jwtUserRepository.DB.Where("email = ?", jwtUser.Email).First(&user)
 
 	return user, result.Error
 }
@@ -54,4 +59,26 @@ func (jwtUserRepository JwtUserRepository) DeleteUserByID(i uint64) error {
 	result := jwtUserRepository.DB.Delete(&user, i)
 
 	return result.Error
+}
+
+func (jwtUserRepository JwtUserRepository) SetRefreshToken(email string, token string, exp time.Time) error {
+	err := jwtUserRepository.Redis.Set(email, token, time.Duration(exp.Sub(time.Now()))).Err()
+
+	if err != nil {
+		log.Printf("Failed to set refresh token: %s ", err)
+	}
+
+	return err
+}
+
+func (jwtUserRepository JwtUserRepository) GetRefreshToken(email string) (string, error) {
+	val, err := jwtUserRepository.Redis.Get(email).Result()
+
+	if err == redis.Nil {
+		fmt.Printf("%s does not exist", email)
+	} else if err != nil {
+		log.Printf("Failed to get refresh token: %s ", err)
+	}
+
+	return val, err
 }

@@ -17,7 +17,12 @@ func TestTokenPathHandler(t *testing.T) {
 		log.Printf("Failed to connect to Database %s ", err)
 	}
 
-	router := SetupRouter(db)
+	redis, err := adapter.InitializeRedisClient()
+	if err != nil {
+		log.Printf("Failed to connect to Redis %s ", err)
+	}
+
+	router := SetupRouter(db, redis)
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/token", nil)
 

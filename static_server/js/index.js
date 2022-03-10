@@ -24,7 +24,7 @@ function login_api() {
     $.ajax(settings).done(function(data, status, xhr) {
         msg = JSON.parse(data);
         if (msg == "OK"){
-            location.href = "/"
+            location.href = "/";
         } else {
             alert("fail");
         }
@@ -48,7 +48,12 @@ function token_api() {
         },
     };
 
-    $.ajax(settings).done(function (response) {
+    $.ajax(settings).done(function (response, textStatus, xhr) {
         console.log(response);
+    }).fail(function (data, textStatus, errorThrown) {
+        if (data.status == "401" || data.status == "403"){
+            alert("ログインしてください。");
+            location.href = "/form/login.html";
+        }
     });
 }

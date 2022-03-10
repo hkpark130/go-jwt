@@ -18,4 +18,6 @@ type JwtUserUseCase interface {
 	GetUserByID(int) (*JwtUser, error)
 	DeleteUserByID(int) error
 	CheckUser(string, string) error
+	SetRefreshToken(string, string) error
+	GetRefreshToken(string) (string, error)
 }

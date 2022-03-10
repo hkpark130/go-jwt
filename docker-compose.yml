@@ -61,6 +61,16 @@ services:
       - db
     networks:
       - go
+# redis
+  redis:
+    container_name: redis
+    image: redis:6.2
+    ports:
+      - 6379:6379
+    volumes: 
+      - "./docker/redis/data/:/docker-entrypoint-initdb.d/"
+    networks:
+      - go
 
 networks:
   go:

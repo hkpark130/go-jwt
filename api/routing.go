@@ -8,11 +8,13 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"gorm.io/gorm"
 )
 
-func SetupRouter(db *gorm.DB) *gin.Engine {
-	jwtUserRepository := &repository.JwtUserRepository{DB: db}
+func SetupRouter(db *gorm.DB, redis *redis.Client) *gin.Engine {
+	jwtUserRepository := &repository.JwtUserRepository{DB: db, Redis: redis}
+
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -39,11 +41,11 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	}))
 
 	r.POST("/api/login", middleware.LoginFormValidation(), func(c *gin.Context) { handlers.Login(c, jwtUserRepository) })
+	r.POST("/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) })
 
 	// user API router
-	r.Group("/user", middleware.Authorization()).
-		GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c) }).
-		POST("/register", func(c *gin.Context) { handlers.RegisterHandler(c, jwtUserRepository) }).
+	r.Group("/user", middleware.Authorization(jwtUserRepository)).
+		GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c, jwtUserRepository) }).
 		GET("/:id", func(c *gin.Context) { handlers.GetUserByIDHandler(c, jwtUserRepository) }).
 		GET("/users", func(c *gin.Context) { handlers.GetUsersHandler(c, jwtUserRepository) }).
 		PUT("/update", func(c *gin.Context) { handlers.UpdateHandler(c, jwtUserRepository) }).

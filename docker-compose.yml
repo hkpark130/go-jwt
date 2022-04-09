@@ -8,6 +8,8 @@ services:
       - POSTGRES_PASSWORD=${DB_PW}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_DB=${DB_NAME}
+    expose:
+      - "5432"
     volumes: 
       - "./docker/data/:/docker-entrypoint-initdb.d/"
     networks:
@@ -16,8 +18,8 @@ services:
   golang:
     container_name: go-jwt-api
     build: .
-    ports:
-      - 3000:3000
+    expose:
+      - "3000"
     volumes:
       - ./:/go/src
     environment: 
@@ -36,7 +38,7 @@ services:
     container_name: go-jwt-web
     build: ./docker/apache/.
     ports:
-      - 80:80
+      - 8300:80
     volumes:
       - ./static_server/:/var/www/html/
     networks:
@@ -63,10 +65,10 @@ services:
       - go
 # redis
   redis:
-    container_name: redis
+    container_name: go-redis
     image: redis:6.2
-    ports:
-      - 6379:6379
+    expose:
+      - "6379"
     volumes: 
       - "./docker/redis/data/:/docker-entrypoint-initdb.d/"
     networks:

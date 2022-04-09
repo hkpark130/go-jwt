@@ -19,8 +19,10 @@ func SetupRouter(db *gorm.DB, redis *redis.Client) *gin.Engine {
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
-			"http://localhost",
-			"https://localhost",
+			"http://localhost:8300",
+			"https://localhost:8300",
+			"http://hkpark130.p-e.kr:8300",
+			"https://hkpark130.p-e.kr:8300",
 		},
 		AllowMethods: []string{
 			"POST",
@@ -46,6 +48,7 @@ func SetupRouter(db *gorm.DB, redis *redis.Client) *gin.Engine {
 	// user API router
 	r.Group("/user", middleware.Authorization(jwtUserRepository)).
 		GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c, jwtUserRepository) }).
+		GET("/admin", func(c *gin.Context) { handlers.AdminHandler(c, jwtUserRepository) }).
 		GET("/:id", func(c *gin.Context) { handlers.GetUserByIDHandler(c, jwtUserRepository) }).
 		GET("/users", func(c *gin.Context) { handlers.GetUsersHandler(c, jwtUserRepository) }).
 		PUT("/update", func(c *gin.Context) { handlers.UpdateHandler(c, jwtUserRepository) }).

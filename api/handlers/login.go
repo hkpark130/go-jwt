@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"golang/jwt/api/domain"
@@ -28,6 +29,56 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func AdminHandler(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
+	cookie, err := c.Request.Cookie("Authorization")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{"status": http.StatusUnauthorized,
+				"error": "Failed to get Authorization cookie."})
+		c.Abort()
+		return
+	}
+
+	payload, err := auth.Decode(strings.Split(cookie.Value, " ")[1])
+	if err != nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"status": http.StatusInternalServerError,
+				"error": "Failed to decode token."})
+		c.Abort()
+		return
+	}
+
+	if payload.Permission == "role_admin" {
+		users, err := jwtUserRepository.GetUsers()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError,
+				gin.H{"status": http.StatusInternalServerError,
+					"error": "Failed to read data."})
+			c.Abort()
+			return
+		}
+
+		jsonUsers, err := json.Marshal(users)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError,
+				gin.H{"status": http.StatusInternalServerError,
+					"error": "Failed to read data."})
+			c.Abort()
+			return
+		}
+
+		c.Data(http.StatusOK,
+			"text/html; charset=utf-8",
+			[]byte(jsonUsers))
+	} else {
+		c.JSON(http.StatusForbidden,
+			gin.H{"status": http.StatusForbidden,
+				"error": "Unauthorized user."})
+		c.Abort()
+		return
+	}
 }
 
 // GetTokenHandler は RefreshToken をコンソールに出します。
@@ -73,7 +124,7 @@ func GetTokenHandler(c *gin.Context, jwtUserRepository *repository.JwtUserReposi
 }
 
 func IsRegisteredUser(c *gin.Context, payload *auth.Payload, password string, jwtUserRepository *repository.JwtUserRepository) bool {
-	jwtUser := &domain.JwtUser{Email: payload.Email, Password: password}
+	jwtUser := NewJwtUser(payload.Email, "", password)
 	user, err := jwtUserRepository.LoginEmailPassword(jwtUser)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusInternalServerError,
@@ -102,11 +153,30 @@ func IsRegisteredUser(c *gin.Context, payload *auth.Payload, password string, jw
 	return false
 }
 
+func SetPayloadFromDB(payload *auth.Payload, jwtUserRepository *repository.JwtUserRepository) bool {
+	jwtUser := NewJwtUser(payload.Email, "", "")
+	user, err := jwtUserRepository.LoginEmailPassword(jwtUser)
+	if err != nil {
+		return false
+	}
+
+	payload.Permission = user.Permission
+	return true
+}
+
 func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	email := c.Request.FormValue("email")
-	payload := auth.CreatePayload(email)
+	payload := auth.CreatePayload(email, "")
 
 	if !IsRegisteredUser(c, payload, c.Request.FormValue("password"), jwtUserRepository) {
+		return
+	}
+
+	if isSet := SetPayloadFromDB(payload, jwtUserRepository); !isSet {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"status": http.StatusInternalServerError,
+				"error": "Failed to set payload from DB."})
+		c.Abort()
 		return
 	}
 

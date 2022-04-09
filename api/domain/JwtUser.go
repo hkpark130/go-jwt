@@ -6,9 +6,10 @@ import (
 
 type JwtUser struct {
 	gorm.Model
-	Email     string `binding:"required" form:"email"`
-	Password  string `binding:"required" form:"password"`
-	DeletedAt gorm.DeletedAt
+	Email      string `binding:"required" form:"email"`
+	Permission string `binding:"required" form:"permission"`
+	Password   string `binding:"required" form:"password"`
+	DeletedAt  gorm.DeletedAt
 }
 
 type JwtUserUseCase interface {

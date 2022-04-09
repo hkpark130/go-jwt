@@ -10,6 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func NewJwtUser(email string, permission string, password string) *domain.JwtUser {
+	return &domain.JwtUser{Email: email, Permission: permission, Password: password}
+}
+
 func RegisterHandler(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	var jwtUser domain.JwtUser
 
@@ -92,7 +96,7 @@ func UpdateHandler(c *gin.Context, jwtUserRepository *repository.JwtUserReposito
 		c.Abort()
 		return
 	}
-	user := &domain.JwtUser{Email: c.Request.FormValue("email"), Password: hashedPassword}
+	user := NewJwtUser(c.Request.FormValue("email"), c.Request.FormValue("permission"), hashedPassword)
 
 	result, err := jwtUserRepository.UpdateUser(userID, user)
 	if err != nil {

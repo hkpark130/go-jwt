@@ -65,7 +65,7 @@ services:
       - go
 # redis
   redis:
-    container_name: redis
+    container_name: go-redis
     image: redis:6.2
     expose:
       - "6379"

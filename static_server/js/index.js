@@ -9,7 +9,7 @@ function login_api() {
     form.append("password", $('input[name=password]').val());
     
     var settings = {
-        "url": "http://localhost:3000/api/login",
+        "url": "http://localhost:8300/api/api/login",
         "method": "POST",
         "timeout": 0,
         "processData": false,
@@ -40,7 +40,27 @@ function login_api() {
 
 function token_api() {
     var settings = {
-        "url": "http://localhost:3000/user/token",
+        "url": "http://localhost:8300/api/user/token",
+        "method": "GET",
+        "timeout": 0,
+        xhrFields: {
+            withCredentials: true
+        },
+    };
+
+    $.ajax(settings).done(function (response, textStatus, xhr) {
+        console.log(response);
+    }).fail(function (data, textStatus, errorThrown) {
+        if (data.status == "401" || data.status == "403"){
+            alert("ログインしてください。");
+            location.href = "/form/login.html";
+        }
+    });
+}
+
+function admin_api() {
+    var settings = {
+        "url": "http://localhost:8300/api/user/admin",
         "method": "GET",
         "timeout": 0,
         xhrFields: {

@@ -31,9 +31,10 @@ type Header struct {
 
 // Payload はユーザーデータを持っている
 type Payload struct {
-	Exp   time.Time `json:"exp"`
-	Iat   time.Time `json:"iat"`
-	Email string    `json:"email"`
+	Exp        time.Time `json:"exp"`
+	Iat        time.Time `json:"iat"`
+	Email      string    `json:"email"`
+	Permission string    `json:"permission"`
 }
 
 var (
@@ -54,6 +55,7 @@ func ModifyForRefreshToken(payload *Payload) *Payload {
 	*modifiedPayload = *payload
 	modifiedPayload.Email = ""
 	modifiedPayload.Exp = payload.Exp.Add(time.Hour * 24 * 7)
+	modifiedPayload.Permission = payload.Permission
 
 	return modifiedPayload
 }
@@ -111,7 +113,7 @@ func ReissueToken(payload Payload, jwtUserRepository *repository.JwtUserReposito
 		return "", "", errExpiredToken
 	}
 
-	newPayload := CreatePayload(payload.Email)
+	newPayload := CreatePayload(payload.Email, payload.Permission)
 	accessToken, err := IssueToken(newPayload)
 	if err != nil {
 		log.Println(err)
@@ -134,11 +136,12 @@ func ReissueToken(payload Payload, jwtUserRepository *repository.JwtUserReposito
 	return accessToken, refreshToken, nil
 }
 
-func CreatePayload(email string) *Payload {
+func CreatePayload(email string, permission string) *Payload {
 	payload := &Payload{
-		Exp:   time.Now().Add(time.Second * time.Duration(3600)), //3600 = 1H
-		Iat:   time.Now(),
-		Email: email}
+		Exp:        time.Now().Add(time.Second * time.Duration(3600)), //3600 = 1H
+		Iat:        time.Now(),
+		Permission: permission,
+		Email:      email}
 
 	return payload
 }

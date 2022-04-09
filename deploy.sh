@@ -1,10 +1,14 @@
 #!/bin/bash
+APPLICATION_NAME=go-jwt
 
-# =========================(test)=========================
-docker-compose run golang go test api/handlers/auth/* -v
-docker rm $(docker ps -a -q -f status=exited)
-# =========================(test)=========================
+CONTAINER_ID=$(docker ps | grep go- | awk '{print $1}')
 
-# =========================(run)=========================
-docker-compose up -d --build
-# =========================(run)=========================
+if [ "$CONTAINER_ID" ]
+then
+  docker stop $CONTAINER_ID
+  docker rm $CONTAINER_ID
+fi
+
+# cd /home/ec2-user/go-jwt
+# docker-compose build
+# docker-compose up -d

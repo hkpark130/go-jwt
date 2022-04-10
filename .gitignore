@@ -19,3 +19,5 @@ jwt
 .vscode
 main
 CompileDaemon
+static_server/fullchain.pem
+static_server/privkey.pem

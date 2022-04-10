@@ -2,7 +2,7 @@
 
 ### 먼저 .env 파일을 생성할 필요가 있습니다.
 ```sh
-% cat .env
+go-jwt % cat .env
 # .env file
 
 DB_USER="user"
@@ -12,7 +12,6 @@ DB_NAME="go-jwt"
 SECRET_KEY="park"
 
 CONF_FILE="apache.conf"
-% 
 ```
 
 ### 빌드
@@ -21,6 +20,12 @@ CONF_FILE="apache.conf"
 docker-compose build
 docker-compose up -d
 ```
+
+### 로그인 테스트용 계정 (""큰따옴표는 빼고 입력해주세요)
+Email  | Password
+------------- | -------------
+"admin@test.com"  | "x"
+"test@test.com"  | "x"
 
 ### 테스트 커맨드를 실행할 때는 SECRET_KEY를 설정할 필요가 있습니다.
 

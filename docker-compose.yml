@@ -41,6 +41,9 @@ services:
       - 8300:80
     volumes:
       - ./static_server/:/var/www/html/
+      - ./docker/apache/${CONF_FILE}:/usr/local/apache2/conf/include/${CONF_FILE}
+      - ${FULLCHAIN:-/dev/null}:/var/www/html/fullchain.pem
+      - ${PRIVKEY:-/dev/null}:/var/www/html/privkey.pem
     networks:
       - go
 # go-doc

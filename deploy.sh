@@ -9,6 +9,6 @@ then
   docker rm $CONTAINER_ID
 fi
 
-# cd /home/ec2-user/go-jwt
-# docker-compose build
-# docker-compose up -d
+cd /home/ec2-user/go-jwt
+docker-compose build
+docker-compose up -d

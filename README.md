@@ -1,6 +1,21 @@
 # go-jwt
 
-### docker-compose run
+### 먼저 .env 파일을 생성할 필요가 있습니다.
+```sh
+% cat .env
+# .env file
+
+DB_USER="user"
+DB_PW="password"
+DB_NAME="go-jwt"
+
+SECRET_KEY="park"
+
+CONF_FILE="apache.conf"
+% 
+```
+
+### 빌드
 
 ```sh
 docker-compose build
@@ -18,5 +33,3 @@ docker-compose run golang go test api/handlers/auth/* -v
 ### 인증 흐름
 ![jwt](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fbowbru%2FbtrvFBvL3KW%2FbavjwicJAa6KUTysGenEX0%2Fimg.png)
 
-### 앞으로 보완할 것
-403(Authorization) 기능도 Payload에 퍼미션 데이터를 넣어서 개발할 예정

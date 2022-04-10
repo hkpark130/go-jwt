@@ -9,7 +9,7 @@ function login_api() {
     form.append("password", $('input[name=password]').val());
     
     var settings = {
-        "url": "http://localhost:8300/api/api/login",
+        "url": location.protocol+"//"+location.host+"/api/api/login",
         "method": "POST",
         "timeout": 0,
         "processData": false,
@@ -40,7 +40,7 @@ function login_api() {
 
 function token_api() {
     var settings = {
-        "url": "http://localhost:8300/api/user/token",
+        "url": location.protocol+"//"+location.host+"/api/user/token",
         "method": "GET",
         "timeout": 0,
         xhrFields: {
@@ -52,7 +52,7 @@ function token_api() {
         console.log(response);
     }).fail(function (data, textStatus, errorThrown) {
         if (data.status == "401" || data.status == "403"){
-            alert("ログインしてください。");
+            alert("로그인 해주세요.");
             location.href = "/form/login.html";
         }
     });
@@ -60,7 +60,7 @@ function token_api() {
 
 function admin_api() {
     var settings = {
-        "url": "http://localhost:8300/api/user/admin",
+        "url": location.protocol+"//"+location.host+"/api/user/admin",
         "method": "GET",
         "timeout": 0,
         xhrFields: {
@@ -72,7 +72,7 @@ function admin_api() {
         console.log(response);
     }).fail(function (data, textStatus, errorThrown) {
         if (data.status == "401" || data.status == "403"){
-            alert("ログインしてください。");
+            alert("로그인 해주세요.");
             location.href = "/form/login.html";
         }
     });

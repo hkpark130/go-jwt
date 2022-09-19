@@ -210,7 +210,7 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	}
 
 	var domainName string
-	if domainName = "localhost"; os.Getenv("SECRET_KEY") == "production.conf" {
+	if domainName = "localhost"; os.Getenv("CONF_FILE") == "production.conf" {
 		domainName = "hkpark130.p-e.kr"
 	}
 	http.SetCookie(c.Writer, &http.Cookie{

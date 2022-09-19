@@ -8,6 +8,7 @@ import (
 	"golang/jwt/api/handlers/auth"
 	"golang/jwt/api/repository"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -208,7 +209,12 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 		return
 	}
 
+	var domainName string
+	if domainName = "localhost"; os.Getenv("SECRET_KEY") == "production.conf" {
+		domainName = "hkpark130.p-e.kr"
+	}
 	http.SetCookie(c.Writer, &http.Cookie{
+		Domain:   domainName,
 		Name:     "Authorization",
 		Value:    fmt.Sprintf("Bearer %s", accessToken),
 		Expires:  ExpiresCookie,
@@ -218,6 +224,7 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	})
 
 	http.SetCookie(c.Writer, &http.Cookie{
+		Domain:   domainName,
 		Name:     "Refresh",
 		Value:    fmt.Sprintf("%s", refreshToken),
 		Expires:  ExpiresCookie,

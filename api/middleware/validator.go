@@ -7,6 +7,7 @@ import (
 	"golang/jwt/api/repository"
 	"net/http"
 	"net/mail"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -71,7 +72,12 @@ func Authorization(jwtUserRepository *repository.JwtUserRepository) gin.HandlerF
 						return
 					}
 
+					var domainName string
+					if domainName = "localhost"; os.Getenv("SECRET_KEY") == "production.conf" {
+						domainName = "hkpark130.p-e.kr"
+					}
 					http.SetCookie(c.Writer, &http.Cookie{
+						Domain:   domainName,
 						Name:     "Authorization",
 						Value:    fmt.Sprintf("Bearer %s", accessToken),
 						Expires:  handlers.ExpiresCookie,
@@ -81,6 +87,7 @@ func Authorization(jwtUserRepository *repository.JwtUserRepository) gin.HandlerF
 					})
 
 					http.SetCookie(c.Writer, &http.Cookie{
+						Domain:   domainName,
 						Name:     "Refresh",
 						Value:    fmt.Sprintf("%s", refreshToken),
 						Expires:  handlers.ExpiresCookie,

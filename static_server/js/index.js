@@ -49,7 +49,13 @@ function token_api() {
     };
 
     $.ajax(settings).done(function (response, textStatus, xhr) {
-        console.log(response);
+        let token = JSON.parse(response);
+        $('#token_table')[0].innerHTML = `
+        <table>
+            <tr><th>Access Token</th><td class="col_a">${token[0]}</td></tr>
+            <tr><th>Refresh Token</th><td class="col_a">${token[1]}</td></tr>
+        </table>
+        `;
     }).fail(function (data, textStatus, errorThrown) {
         if (data.status == "401" || data.status == "403"){
             alert("로그인 해주세요.");
@@ -69,7 +75,39 @@ function admin_api() {
     };
 
     $.ajax(settings).done(function (response, textStatus, xhr) {
-        console.log(response);
+        let users=JSON.parse(response);
+        let result = "<table><tr> <th>ID</th> <th>Email</th> <th>Permission</th> </tr>";
+        for (i = 0; i < users.length; i++) {
+            result += `
+            <tr>
+                <td>${users[i]['ID']}</td>
+                <td>${users[i]['Email']}</td>
+                <td>${users[i]['Permission']}</td>
+            </tr>`;
+        }
+        result += "</table>";
+        $('#users_table')[0].innerHTML = result;
+    }).fail(function (data, textStatus, errorThrown) {
+        if (data.status == "401" || data.status == "403"){
+            alert("로그인 해주세요.");
+            location.href = "/form/login.html";
+        }
+    });
+}
+
+function logout_api() {
+    var settings = {
+        "url": location.protocol+"//"+location.host+"/api/user/logout",
+        "method": "GET",
+        "timeout": 0,
+        xhrFields: {
+            withCredentials: true
+        },
+    };
+
+    $.ajax(settings).done(function (response, textStatus, xhr) {
+        alert("로그아웃 되었습니다.");
+        location.href = "/form/login.html";
     }).fail(function (data, textStatus, errorThrown) {
         if (data.status == "401" || data.status == "403"){
             alert("로그인 해주세요.");

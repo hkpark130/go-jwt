@@ -5,13 +5,16 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
         <script src="/js/index.js" charset="utf-8" defer></script>
         <title>go-jwt</title>
+        <link href="index.css" rel="stylesheet">
         <link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.css'>
     </head>
     <body>
         <div>
             <b>index</b></br>
             <input type="button" value="Token" onclick="token_api();"/>
-            <a href="/admin"><button type="submit">Admin</button></a>
+            <a href="/admin"><button type="submit">Admin</button></a></br>
+            <input type="button" value="Logout" onclick="logout_api();"/></br>
         </div>
+        <div id="token_table"></div>
     </body>
 </html>

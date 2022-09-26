@@ -1,4 +1,4 @@
-// Package auth is JWT トークン認証関連パッケージ
+// Package auth is JWT 토큰 인증관련 패키지
 package auth
 
 import (
@@ -17,19 +17,19 @@ import (
 	"github.com/go-redis/redis"
 )
 
-// Jwt はトークンハッシュ化の際に使われる
+// Jwt 는 토큰 해쉬화 때 사용됨
 type Jwt struct {
 	Alg       string
 	SecretKey string
 }
 
-// Header はトークンタイプとハッシュアルゴリズムの情報を持っている
+// Header 은 토큰 타입과 해쉬 알고리즘 정보를 가지고 있음
 type Header struct {
 	Typ string `json:"typ"`
 	Alg string `json:"alg"`
 }
 
-// Payload はユーザーデータを持っている
+// Payload 는 유저 데이터를 가지고 있음
 type Payload struct {
 	Exp        time.Time `json:"exp"`
 	Iat        time.Time `json:"iat"`
@@ -49,18 +49,18 @@ func hmac256(message, secret string) string {
 	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }
 
-// ModifyForRefreshToken はRefreshToken に入れるPayload を作り直す
+// ModifyForRefreshToken 은 RefreshToken 에 넣을 Payload 을 다시 만듬
 func ModifyForRefreshToken(payload *Payload) *Payload {
 	modifiedPayload := &Payload{}
 	*modifiedPayload = *payload
 	modifiedPayload.Email = ""
-	modifiedPayload.Exp = payload.Exp.Add(time.Hour * 24 * 7)
+	modifiedPayload.Exp = payload.Exp.Add(time.Hour * 24 * 1)
 	modifiedPayload.Permission = payload.Permission
 
 	return modifiedPayload
 }
 
-// IssueToken は受け取ったPayload をもとにトークンを作る
+// IssueToken 은 파라미터로 받은 Payload 을 기반으로 토큰을 만듬
 func IssueToken(payload *Payload) (string, error) {
 	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")}
 
@@ -91,7 +91,7 @@ func IssueToken(payload *Payload) (string, error) {
 	return token, err
 }
 
-// ReissueToken は受け取った Access Token の payload をもとにトークンを再発行する
+// ReissueToken 은 파라미터로 받은 Access Token 의 payload 을 기반으로 토큰을 재발행
 func ReissueToken(payload Payload, jwtUserRepository *repository.JwtUserRepository) (string, string, error) {
 	refreshToken, err := jwtUserRepository.GetRefreshToken(payload.Email)
 	if err != nil {
@@ -146,7 +146,7 @@ func CreatePayload(email string, permission string) *Payload {
 	return payload
 }
 
-// isExpired は受け取ったPayload の有効期限を確認する
+// isExpired 은 파라미터로 받은 Payload 의 유효기간을 확인
 func isExpired(pldat Payload) bool {
 	layout := "2006-01-02 15:04:05"
 	exp := pldat.Exp.Format(layout)
@@ -173,7 +173,7 @@ func parseJWT(token string) ([]string, error) {
 	return nil, errInvalidJwt
 }
 
-// Decode は受け取ったtoken をPayload にデコーディングする
+// Decode 은 파라미터로 받은 token 을 Payload 에 디코딩함
 func Decode(token string) (Payload, error) {
 	parts, err := parseJWT(token)
 	if err != nil {
@@ -193,7 +193,7 @@ func Decode(token string) (Payload, error) {
 	return pldat, err
 }
 
-// IsTokenVerified は受け取ったtoken の有効性を確認する
+// IsTokenVerified 은 파라미터로 받은 token 의 유효성을 확인
 func IsTokenVerified(token string) (bool, error) {
 	jwt := &Jwt{Alg: "HS256", SecretKey: os.Getenv("SECRET_KEY")} //id+pw
 	parts, err := parseJWT(token)

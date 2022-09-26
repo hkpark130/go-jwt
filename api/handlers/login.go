@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	ExpiresCookie = time.Now().Add(time.Hour * 24 * 7)
+	ExpiresCookie = time.Now().Add(time.Hour * 24 * 1)
 )
 
 func HashPassword(password string) (string, error) {
@@ -82,7 +82,6 @@ func AdminHandler(c *gin.Context, jwtUserRepository *repository.JwtUserRepositor
 	}
 }
 
-// GetTokenHandler は RefreshToken をコンソールに出します。
 func GetTokenHandler(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 	cookie, err := c.Request.Cookie("Authorization")
 	if err != nil {
@@ -119,9 +118,55 @@ func GetTokenHandler(c *gin.Context, jwtUserRepository *repository.JwtUserReposi
 		}
 	}
 
+	result, err := json.Marshal([]string{strings.Split(cookie.Value, " ")[1], refresh})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"status": http.StatusInternalServerError,
+				"error": "Failed to read data."})
+		c.Abort()
+		return
+	}
+
 	c.Data(http.StatusOK,
 		"text/html; charset=utf-8",
-		[]byte(refresh))
+		[]byte(result))
+}
+
+func LogoutHandler(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
+	_, err := c.Request.Cookie("Authorization")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{"status": http.StatusUnauthorized,
+				"error": "Failed to get Authorization cookie."})
+		c.Abort()
+		return
+	}
+
+	var domainName string
+	if domainName = "localhost"; os.Getenv("CONF_FILE") == "production.conf" {
+		domainName = "hkpark130.p-e.kr"
+	}
+	http.SetCookie(c.Writer, &http.Cookie{
+		Domain:   domainName,
+		Name:     "Authorization",
+		Value:    "",
+		MaxAge:   -1,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+	})
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Domain:   domainName,
+		Name:     "Refresh",
+		Value:    "",
+		MaxAge:   -1,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+	})
+
+	c.JSON(http.StatusOK, "OK")
 }
 
 func IsRegisteredUser(c *gin.Context, payload *auth.Payload, password string, jwtUserRepository *repository.JwtUserRepository) bool {

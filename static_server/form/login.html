@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="content-language" content="ja">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
         <script src="/js/index.js" charset="utf-8" defer></script>
         <title>go-jwt</title>
@@ -17,6 +17,22 @@
                 <div id="error"></div>
                 <input type="button" value="login" onclick="login_api();"/>
             </form>
+        </div>
+        <div>
+            <table>
+                <tr>
+                    <th colspan="3" style="text-align: center;">아래의 유저로 로그인해 주세요.</th>
+                </tr>
+                <tr>
+                    <th style="width: 15%;">Permission</th> <th>Email</th> <th>Password</th>
+                </tr>
+                <tr>
+                    <th>관리자 유저</th> <td>admin@test.com</td> <td>x</td>
+                </tr>
+                <tr>
+                    <th>일반 유저</th> <td>test@test.com</td> <td>x</td>
+                </tr>
+            </table>
         </div>
     </body>
 </html>

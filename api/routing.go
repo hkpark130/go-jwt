@@ -48,6 +48,7 @@ func SetupRouter(db *gorm.DB, redis *redis.Client) *gin.Engine {
 	// user API router
 	r.Group("/user", middleware.Authorization(jwtUserRepository)).
 		GET("/token", func(c *gin.Context) { handlers.GetTokenHandler(c, jwtUserRepository) }).
+		GET("/logout", func(c *gin.Context) { handlers.LogoutHandler(c, jwtUserRepository) }).
 		GET("/admin", func(c *gin.Context) { handlers.AdminHandler(c, jwtUserRepository) }).
 		GET("/:id", func(c *gin.Context) { handlers.GetUserByIDHandler(c, jwtUserRepository) }).
 		GET("/users", func(c *gin.Context) { handlers.GetUsersHandler(c, jwtUserRepository) }).

@@ -60,7 +60,7 @@ func Authorization(jwtUserRepository *repository.JwtUserRepository) gin.HandlerF
 					return
 				}
 
-				// Access Token 再発行
+				// Access Token 재발행
 				if isVerified, _ := auth.IsTokenVerified(refreshToken.Value); isVerified {
 					pldat, err := auth.Decode(strings.Split(cookie.Value, " ")[1])
 					accessToken, refreshToken, err := auth.ReissueToken(pldat, jwtUserRepository)

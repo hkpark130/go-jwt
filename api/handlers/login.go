@@ -254,6 +254,7 @@ func Login(c *gin.Context, jwtUserRepository *repository.JwtUserRepository) {
 		return
 	}
 
+	ExpiresCookie = time.Now().Add(time.Hour * 24 * 1)
 	var domainName string
 	if domainName = "localhost"; os.Getenv("CONF_FILE") == "production.conf" {
 		domainName = "hkpark130.p-e.kr"

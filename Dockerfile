@@ -1,7 +1,10 @@
-FROM golang:1.17.0-alpine3.14
+FROM golang:1.19
 
-RUN apk update && apk add git
-RUN apk add --update alpine-sdk
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git \
+        build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /go/src
 COPY ./ /go/src
